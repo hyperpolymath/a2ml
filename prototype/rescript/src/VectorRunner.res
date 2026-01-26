@@ -61,13 +61,13 @@ let run = (): int => {
           failures->Belt.Array.push(inputPath ++ ": expected error, got ok")
         } else {
           let first = errors->Belt.Array.getExn(0)
-          if !Js.String2.includes(first.msg, msg) {
+  if !String.includes(first.msg, msg) {
             failures->Belt.Array.push(inputPath ++ ": error mismatch")
           }
         }
     }
 
-    let htmlExpectedPath = Js.String2.replace(inputPath, ".a2ml", ".html.expected")
+let htmlExpectedPath = String.replace(inputPath, ".a2ml", ".html.expected")
     if Fs.existsSync(htmlExpectedPath) {
       let actualHtml = A2ml.renderHtml(doc)->normalizeHtml
       let expectedHtml = Fs.readFileSync(htmlExpectedPath, "utf8")->normalizeHtml

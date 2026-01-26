@@ -67,13 +67,13 @@ let run = (): array<report> => {
             msgs->Belt.Array.push("expected error, got ok")
           } else {
             let first = errors->Belt.Array.getExn(0)
-            if !Js.String2.includes(first.msg, msg) {
+  if !String.includes(first.msg, msg) {
               msgs->Belt.Array.push("error mismatch")
             }
           }
       }
 
-      let htmlExpectedPath = Js.String2.replace(inputPath, ".a2ml", ".html.expected")
+let htmlExpectedPath = String.replace(inputPath, ".a2ml", ".html.expected")
       if Fs.existsSync(htmlExpectedPath) {
         let actualHtml = A2ml.renderHtml(doc)->normalizeHtml
         let expectedHtml = Fs.readFileSync(htmlExpectedPath, "utf8")->normalizeHtml
@@ -88,7 +88,11 @@ let run = (): array<report> => {
 
 let _ = {
   let results = run()
-  let json = Js.Json.stringifyAny(results)
+  let json =
+    switch JSON.stringifyAny(results) {
+    | Some(value) => value
+    | None => "[]"
+    }
   Fs.writeFileSync("build/vector-report.json", json)
   let failures = results->Belt.Array.keep(r => !r.ok)
   if Belt.Array.length(failures) == 0 {
