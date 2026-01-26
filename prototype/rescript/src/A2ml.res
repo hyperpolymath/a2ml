@@ -41,7 +41,7 @@ let indexOfOpt = (s: string, sub: string): option<int> => {
 }
 
 let indexFromOpt = (s: string, start: int, sub: string): option<int> => {
-  let idx = String.indexFrom(s, start, sub)
+  let idx = String.indexOfFrom(s, ~from=start, sub)
   if idx < 0 { None } else { Some(idx) }
 }
 
