@@ -36,7 +36,7 @@ let parseExpected = (text: string): option<string> => {
 let normalizeHtml = (html: string): string => {
   // Collapse whitespace for stable comparison.
   let re = %re("/\\s+/")
-  String.replaceByRe(re, " ", html)->String.trim
+  Js.String.replaceByRe(re, " ", html)->String.trim
 }
 
 let run = (): int => {
