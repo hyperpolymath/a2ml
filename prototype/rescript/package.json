@@ -1,0 +1,8 @@
+{
+  "name": "a2ml-rescript",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@rescript/runtime": "^1.0.0"
+  }
+}

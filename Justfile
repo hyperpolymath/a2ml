@@ -206,6 +206,14 @@ vectors:
         echo "rescript not found; install the ReScript compiler." >&2; \
         exit 1; \
       fi
+    @if [ ! -d prototype/rescript/node_modules/@rescript/runtime ]; then \
+        if command -v npm >/dev/null 2>&1; then \
+          (cd prototype/rescript && npm install); \
+        else \
+          echo "npm not found; install npm to fetch @rescript/runtime." >&2; \
+          exit 1; \
+        fi; \
+      fi
     @if [ -x /home/hyper/.deno/bin/deno ]; then \
         /home/hyper/.deno/bin/deno run --config prototype/rescript/deno.json prototype/rescript/src/RunVectors.bs.js; \
       elif command -v deno >/dev/null 2>&1; then \
@@ -231,6 +239,14 @@ vectors-report:
         echo "rescript not found; install the ReScript compiler." >&2; \
         exit 1; \
       fi
+    @if [ ! -d prototype/rescript/node_modules/@rescript/runtime ]; then \
+        if command -v npm >/dev/null 2>&1; then \
+          (cd prototype/rescript && npm install); \
+        else \
+          echo "npm not found; install npm to fetch @rescript/runtime." >&2; \
+          exit 1; \
+        fi; \
+      fi
     @if [ -x /home/hyper/.deno/bin/deno ]; then \
         /home/hyper/.deno/bin/deno run --config prototype/rescript/deno.json prototype/rescript/src/RunReport.bs.js; \
       elif command -v deno >/dev/null 2>&1; then \
@@ -253,6 +269,14 @@ dump-ast path:
       else \
         echo "rescript not found; install the ReScript compiler." >&2; \
         exit 1; \
+      fi
+    @if [ ! -d prototype/rescript/node_modules/@rescript/runtime ]; then \
+        if command -v npm >/dev/null 2>&1; then \
+          (cd prototype/rescript && npm install); \
+        else \
+          echo "npm not found; install npm to fetch @rescript/runtime." >&2; \
+          exit 1; \
+        fi; \
       fi
     @if [ -x /home/hyper/.deno/bin/deno ]; then \
         /home/hyper/.deno/bin/deno run --config prototype/rescript/deno.json prototype/rescript/src/DumpAst.bs.js {{path}}; \
