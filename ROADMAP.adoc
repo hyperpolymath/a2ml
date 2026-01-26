@@ -3,7 +3,7 @@
 
 == Current Status
 
-Design phase. Draft spec and modular surface grammar complete.
+Design phase complete. v0.1.0 published with spec drafts, prototypes, and\n+conformance targets.
 
 == Milestones
 
@@ -11,13 +11,15 @@ Design phase. Draft spec and modular surface grammar complete.
 * [x] Surface grammar draft
 * [x] Typed core outline
 * [x] Module 0 quickstart
-* [ ] Formal grammar appendix (EBNF + tokens)
-* [ ] Conformance and test vectors
+* [x] Formal grammar appendix (EBNF + tokens)
+* [x] Conformance and test vectors
+* [x] Release notes + announcement draft
 
 === v0.2.0 - Reference Parser (Prototype)
 * [ ] Module 0 parser (surface -> AST)
 * [ ] HTML renderer (basic)
 * [ ] Lax/checked mode validation
+* [ ] Publish web demo page
 
 === v0.3.0 - Attestation Core
 * [ ] Idris2 typed core encoding
@@ -27,6 +29,7 @@ Design phase. Draft spec and modular surface grammar complete.
 === v0.4.0 - Web Rendering
 * [ ] JS/Rescript parser/renderer
 * [ ] Web component for client-side rendering
+* [ ] WASM demo page (rescript-wasm-runtime)
 
 === v1.0.0 - Stable
 * [ ] Spec stabilization and IANA submission
@@ -38,3 +41,4 @@ Design phase. Draft spec and modular surface grammar complete.
 * Additional surface syntax variants (Djot-compatible, strict mode)
 * PDF/LaTeX renderers
 * Policy bundles for domain-specific invariants
+* Signed attestation metadata and canonical hash format
