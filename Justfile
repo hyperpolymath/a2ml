@@ -196,7 +196,12 @@ demo:
 # Run vector checks (prototype runner)
 vectors:
     @echo "Running vector checks..."
-    @echo "Note: requires ReScript build output and Node."
+    @if command -v rescript >/dev/null 2>&1; then \
+        rescript build -with-deps; \
+      else \
+        echo "rescript not found; install the ReScript compiler." >&2; \
+        exit 1; \
+      fi
     @node prototype/rescript/src/RunVectors.bs.js
 
 # Generate justfile cookbook documentation
