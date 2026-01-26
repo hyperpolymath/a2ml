@@ -215,9 +215,9 @@ vectors:
         fi; \
       fi
     @if [ -x /home/hyper/.deno/bin/deno ]; then \
-        /home/hyper/.deno/bin/deno run --config prototype/rescript/deno.json prototype/rescript/src/RunVectors.bs.js; \
+        /home/hyper/.deno/bin/deno run --allow-read --config prototype/rescript/deno.json prototype/rescript/src/RunVectors.bs.js; \
       elif command -v deno >/dev/null 2>&1; then \
-        deno run --config prototype/rescript/deno.json prototype/rescript/src/RunVectors.bs.js; \
+        deno run --allow-read --config prototype/rescript/deno.json prototype/rescript/src/RunVectors.bs.js; \
       elif command -v node >/dev/null 2>&1; then \
         node prototype/rescript/src/RunVectors.bs.js; \
       else \
@@ -248,9 +248,9 @@ vectors-report:
         fi; \
       fi
     @if [ -x /home/hyper/.deno/bin/deno ]; then \
-        /home/hyper/.deno/bin/deno run --config prototype/rescript/deno.json prototype/rescript/src/RunReport.bs.js; \
+        /home/hyper/.deno/bin/deno run --allow-read --config prototype/rescript/deno.json prototype/rescript/src/RunReport.bs.js; \
       elif command -v deno >/dev/null 2>&1; then \
-        deno run --config prototype/rescript/deno.json prototype/rescript/src/RunReport.bs.js; \
+        deno run --allow-read --config prototype/rescript/deno.json prototype/rescript/src/RunReport.bs.js; \
       elif command -v node >/dev/null 2>&1; then \
         node prototype/rescript/src/RunReport.bs.js; \
       else \
@@ -279,9 +279,9 @@ dump-ast path:
         fi; \
       fi
     @if [ -x /home/hyper/.deno/bin/deno ]; then \
-        /home/hyper/.deno/bin/deno run --config prototype/rescript/deno.json prototype/rescript/src/DumpAst.bs.js {{path}}; \
+        /home/hyper/.deno/bin/deno run --allow-read --config prototype/rescript/deno.json prototype/rescript/src/DumpAst.bs.js {{path}}; \
       elif command -v deno >/dev/null 2>&1; then \
-        deno run --config prototype/rescript/deno.json prototype/rescript/src/DumpAst.bs.js {{path}}; \
+        deno run --allow-read --config prototype/rescript/deno.json prototype/rescript/src/DumpAst.bs.js {{path}}; \
       elif command -v node >/dev/null 2>&1; then \
         node prototype/rescript/src/DumpAst.bs.js {{path}}; \
       else \
