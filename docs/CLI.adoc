@@ -13,6 +13,9 @@ This CLI is a lightweight wrapper around the ReScript prototype parser.
 
 * `--mode lax|checked` (default: lax)
 * `--out <path>` to write output to a file
+* `--concat` to join output when multiple inputs are provided
+* `--stdin` to read from stdin (equivalent to `-`)
+* `-h, --help` show help
 
 == Run
 
@@ -21,4 +24,9 @@ This CLI is a lightweight wrapper around the ReScript prototype parser.
 just cli render tests/vectors/module0-basic.a2ml
 just cli validate tests/vectors/module0-basic.a2ml
 just cli ast tests/vectors/module0-basic.a2ml --out /tmp/ast.json
+cat tests/vectors/module0-basic.a2ml | just cli render - --stdin
 ----
+
+== Man Page
+
+* `docs/a2ml.1`
