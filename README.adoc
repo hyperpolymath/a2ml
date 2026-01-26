@@ -65,6 +65,10 @@ A2ML is a typed, attested markup format. It verifies structure and references.
 
 * link:docs/VECTORS.adoc[Vector Runner (Prototype)]
 
+== Core Tests
+
+* `just core-tests` (Idris2)
+
 == Release Notes
 
 * link:RELEASE-NOTES-v0.1.0.adoc[v0.1.0 Release Notes]

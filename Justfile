@@ -219,6 +219,17 @@ dump-ast path:
         echo "Neither deno nor node found; install one to dump AST." >&2; \
         exit 1; \
       fi
+
+# Run Idris2 core tests
+core-tests:
+    @if command -v idris2 >/dev/null 2>&1; then \
+        mkdir -p build; \
+        idris2 -i src tests/CoreTests.idr -o build/core-tests; \
+        ./build/core-tests; \
+      else \
+        echo "idris2 not found; install Idris2 to run core tests." >&2; \
+        exit 1; \
+      fi
     @if command -v deno >/dev/null 2>&1; then \
         deno run --config prototype/rescript/deno.json prototype/rescript/src/RunVectors.bs.js; \
       elif command -v node >/dev/null 2>&1; then \
