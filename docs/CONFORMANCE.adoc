@@ -23,6 +23,8 @@ Test vectors live in `tests/vectors/`.
 Each vector includes a `.a2ml` input and a human-readable `.expected` file
 that describes the required parse outcome.
 
+Reference prototype: `prototype/rescript/` (parser + basic validator sketch).
+
 == Vector List (v0)
 
 * `module0-basic.a2ml` -> `module0-basic.expected`

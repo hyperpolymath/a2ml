@@ -16,9 +16,9 @@ Design phase complete. v0.1.0 published with spec drafts, prototypes, and\n+conf
 * [x] Release notes + announcement draft
 
 === v0.2.0 - Reference Parser (Prototype)
-* [ ] Module 0 parser (surface -> AST)
-* [ ] HTML renderer (basic)
-* [ ] Lax/checked mode validation
+* [~] Module 0 parser (surface -> AST) (prototype in `prototype/rescript/`)
+* [~] HTML renderer (basic) (prototype in `prototype/rescript/`)
+* [~] Lax/checked mode validation (basic)
 * [ ] Publish web demo page
 * Target: 2026-03
 

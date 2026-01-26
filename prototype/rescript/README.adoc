@@ -5,6 +5,7 @@ This is a minimal, non-exhaustive ReScript prototype that demonstrates:
 
 * Parsing a tiny Module 0 subset
 * Rendering to HTML
+* Basic checked-mode validation (ID/ref resolution)
 
 It is intentionally small and not a full implementation.
 
