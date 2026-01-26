@@ -3,14 +3,21 @@
 
 == Status
 
-* Pending full run
+* Partial run completed (vectors)
 * Target: v1 release
+* Latest update: 2026-01-26
 
 == Artifacts
 
 * `build/vector-report.json` (from `just vectors-report`)
 * AST dumps for reference inputs (from `just dump-ast`)
 * Typed core checks (from `just core-tests`)
+
+== Results
+
+* Vectors: PASS (Module 0 vectors, 2026-01-26)
+* AST dumps: pending
+* Typed core checks: pending
 
 == Procedure
 
