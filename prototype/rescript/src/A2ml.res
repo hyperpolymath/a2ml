@@ -203,7 +203,7 @@ let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): 
                 }
               }
             let (nextIndex, parts) = collect(i, [])
-            let text = parts->Belt.Array.joinWith(" ")
+            let text = parts->Belt.Array.joinWith(" ", s => s)
             blocks->Belt.Array.push(Paragraph(parseInline(text)))
             loop(nextIndex)
           }
@@ -231,7 +231,7 @@ let renderInline = (parts: array<inline>): string => {
       | Link(label, url) => "<a href=\"" ++ url ++ "\">" ++ label ++ "</a>"
       }
     )
-  ->Belt.Array.joinWith("")
+  ->Belt.Array.joinWith("", s => s)
 }
 
 let rec renderBlocks = (blocks: array<block>): string => {
@@ -242,18 +242,21 @@ let rec renderBlocks = (blocks: array<block>): string => {
           "<h" ++ string_of_int(level) ++ ">" ++ text ++ "</h" ++ string_of_int(level) ++ ">"
       | Paragraph(parts) => "<p>" ++ renderInline(parts) ++ "</p>"
       | List(items) =>
-          let lis = items->Belt.Array.map(item => "<li>" ++ renderInline(item) ++ "</li>")->Belt.Array.joinWith("")
+          let lis =
+            items
+            ->Belt.Array.map(item => "<li>" ++ renderInline(item) ++ "</li>")
+            ->Belt.Array.joinWith("", s => s)
           "<ul>" ++ lis ++ "</ul>"
       | Directive(name, attrs, body) =>
           let content = renderBlocks(body)
           let attrsString = attrs
             ->Belt.Array.map(((k, v)) => k ++ "=\"" ++ v ++ "\"")
-            ->Belt.Array.joinWith(" ")
+            ->Belt.Array.joinWith(" ", s => s)
           let dataAttr = if attrsString == "" {""} else {" " ++ attrsString}
           "<div data-a2ml=\"" ++ name ++ "\"" ++ dataAttr ++ ">" ++ content ++ "</div>"
       }
     )
-  ->Belt.Array.joinWith("\n")
+  ->Belt.Array.joinWith("\n", s => s)
 }
 
 let renderHtml = (doc: doc): string => {
