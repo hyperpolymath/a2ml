@@ -203,7 +203,7 @@ vectors:
         exit 1; \
       fi
     @if command -v deno >/dev/null 2>&1; then \
-        deno run --allow-read prototype/rescript/src/RunVectors.bs.js; \
+        deno run --config prototype/rescript/deno.json prototype/rescript/src/RunVectors.bs.js; \
       elif command -v node >/dev/null 2>&1; then \
         node prototype/rescript/src/RunVectors.bs.js; \
       else \
