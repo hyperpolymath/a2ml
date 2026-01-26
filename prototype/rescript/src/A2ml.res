@@ -11,7 +11,7 @@ type inline =
   | Strong(string)
   | Link(string, string)
 
-type block =
+type rec block =
   | Heading(int, string)
   | Paragraph(array<inline>)
   | List(array<array<inline>>)
