@@ -3,10 +3,10 @@
 
 This is a minimal Ada TUI wrapper around the A2ML CLI.
 
-== Notes
+== SPARK separation
 
-* Uses `GNAT.OS_Lib.Spawn` to run `just cli ...` commands.
-* Marked `SPARK_Mode (Off)` because process spawning is not SPARK-compatible.
+* `A2ML_TUI.Core` is SPARK-safe logic (mode toggles, command composition).
+* `Main` is non-SPARK (process spawning, IO).
 
 == Build
 

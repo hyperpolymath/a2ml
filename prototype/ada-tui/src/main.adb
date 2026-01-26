@@ -1,13 +1,14 @@
 with Ada.Text_IO;
 with Ada.Strings.Fixed;
-with Ada.Command_Line;
 with GNAT.OS_Lib;
+with A2ML_TUI.Core;
 
 procedure Main is
    pragma SPARK_Mode (Off);
 
    use Ada.Text_IO;
    use Ada.Strings.Fixed;
+   use A2ML_TUI.Core;
 
    function Read_Line_Trim return String is
       Buffer : String (1 .. 1024);
@@ -16,21 +17,6 @@ procedure Main is
       Get_Line (Buffer, Last);
       return Trim (Buffer (1 .. Last), Ada.Strings.Both);
    end Read_Line_Trim;
-
-   function Build_Command (Command : String; Input : String; Mode : String; Out_Path : String; Concat : Boolean) return String is
-      Cmd : String := "just cli " & Command & " " & Input;
-   begin
-      if Mode /= "" then
-         Cmd := Cmd & " --mode " & Mode;
-      end if;
-      if Out_Path /= "" then
-         Cmd := Cmd & " --out " & Out_Path;
-      end if;
-      if Concat then
-         Cmd := Cmd & " --concat";
-      end if;
-      return Cmd;
-   end Build_Command;
 
    procedure Run_Command (Cmd : String) is
       Args   : GNAT.OS_Lib.Argument_List_Access;
@@ -44,9 +30,8 @@ procedure Main is
 
    Choice : String := "";
    Input  : String := "";
-   Mode   : String := "checked";
    Outp   : String := "";
-   Concat : Boolean := False;
+   St     : State;
 begin
    Put_Line ("A2ML Ada TUI (prototype)");
    Put_Line ("------------------------");
@@ -55,9 +40,9 @@ begin
       Put_Line ("1) Render HTML");
       Put_Line ("2) Validate (checked)");
       Put_Line ("3) Dump AST (JSON)");
-      Put_Line ("4) Toggle mode (lax/checked) [current: " & Mode & "]");
-      Put_Line ("5) Toggle concat [current: " & (if Concat then "on" else "off") & "]");
-      Put_Line ("6) Set output path [current: " & (if Outp = "" then "stdout" else Outp) & "]");
+      Put_Line ("4) Toggle mode (lax/checked) [current: " & (if St.Mode = Checked then "checked" else "lax") & "]");
+      Put_Line ("5) Toggle concat [current: " & (if St.Concat then "on" else "off") & "]");
+      Put_Line ("6) Set output path [current: " & (if St.Outp = " " then "stdout" else St.Outp) & "]");
       Put_Line ("7) Quit");
       Put ("> ");
       Choice := Read_Line_Trim;
@@ -65,16 +50,13 @@ begin
       if Choice = "7" then
          exit;
       elsif Choice = "4" then
-         if Mode = "checked" then
-            Mode := "lax";
-         else
-            Mode := "checked";
-         end if;
+         St := Toggle_Mode (St);
       elsif Choice = "5" then
-         Concat := not Concat;
+         St := Toggle_Concat (St);
       elsif Choice = "6" then
          Put ("Output path (empty for stdout): ");
          Outp := Read_Line_Trim;
+         St := Set_Out (St, Outp);
       elsif Choice = "1" or else Choice = "2" or else Choice = "3" then
          Put ("Input file (or '-' for stdin): ");
          Input := Read_Line_Trim;
@@ -83,9 +65,9 @@ begin
          else
             declare
                Cmd : String :=
-                 (if Choice = "1" then Build_Command ("render", Input, Mode, Outp, Concat)
-                  elsif Choice = "2" then Build_Command ("validate", Input, Mode, Outp, Concat)
-                  else Build_Command ("ast", Input, Mode, Outp, Concat));
+                 (if Choice = "1" then Build_Command ("render", Input, St.Mode, St.Outp, St.Concat)
+                  elsif Choice = "2" then Build_Command ("validate", Input, St.Mode, St.Outp, St.Concat)
+                  else Build_Command ("ast", Input, St.Mode, St.Outp, St.Concat));
             begin
                Put_Line ("Running: " & Cmd);
                Run_Command (Cmd);
