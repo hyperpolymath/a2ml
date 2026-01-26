@@ -231,6 +231,17 @@ core-tests:
         exit 1; \
       fi
 
+# Build Ada TUI prototype
+ada-tui:
+    @if command -v gnatmake >/dev/null 2>&1; then \
+        mkdir -p build; \
+        gnatmake -gnat2022 -O2 -o build/a2ml-tui prototype/ada-tui/src/main.adb; \
+        echo "Built: build/a2ml-tui"; \
+      else \
+        echo "gnatmake not found; install GNAT to build the Ada TUI." >&2; \
+        exit 1; \
+      fi
+
 # Run CLI (prototype)
 cli *args:
     @if command -v rescript >/dev/null 2>&1; then \
