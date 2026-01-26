@@ -73,7 +73,7 @@ let parseAttrs = (line: string): attrs => {
   if start == -1 || end_ == -1 || end_ < start {
     []
   } else {
-    let inner = String.slice(line, start + 1, end_)
+    let inner = String.slice(line, ~start=start + 1, ~end_=end_)
     let parts = String.split(inner, ",")
     parts
     ->Belt.Array.keepMap(part => {
@@ -103,7 +103,7 @@ let parseInline = (text: string): array<inline> => {
       switch close {
       | None => loop(i + 2, Belt.Array.concat([Text("**")], acc))
       | Some(j) =>
-        let content = String.slice(text, i + 2, j)
+        let content = String.slice(text, ~start=i + 2, ~end_=j)
         loop(j + 2, Belt.Array.concat([Strong(content)], acc))
       }
     } else if isChar(text, i, "*") {
@@ -111,7 +111,7 @@ let parseInline = (text: string): array<inline> => {
       switch close {
       | None => loop(i + 1, Belt.Array.concat([Text("*")], acc))
       | Some(j) =>
-        let content = String.slice(text, i + 1, j)
+        let content = String.slice(text, ~start=i + 1, ~end_=j)
         loop(j + 1, Belt.Array.concat([Emph(content)], acc))
       }
     } else if isChar(text, i, "[") {
@@ -124,8 +124,8 @@ let parseInline = (text: string): array<inline> => {
           switch closeUrl {
           | None => loop(i + 1, Belt.Array.concat([Text("[")], acc))
           | Some(k) =>
-            let label = String.slice(text, i + 1, j)
-            let url = String.slice(text, j + 2, k)
+            let label = String.slice(text, ~start=i + 1, ~end_=j)
+            let url = String.slice(text, ~start=j + 2, ~end_=k)
             loop(k + 1, Belt.Array.concat([Link(label, url)], acc))
           }
         } else {
@@ -141,7 +141,7 @@ let parseInline = (text: string): array<inline> => {
         } else {
           Belt.Array.reduce(nextSpecial, String.length(text), (a, b) => if b < a {b} else {a})
         }
-      let chunk = String.slice(text, i, next)
+      let chunk = String.slice(text, ~start=i, ~end_=next)
       loop(next, Belt.Array.concat([Text(chunk)], acc))
     }
   loop(0, [])
@@ -171,7 +171,7 @@ let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): 
             let name = String.slice(header, ~start=1)
             let nameOnly = switch indexOfOpt(name, ":") {
               | None => name
-              | Some(idx) => String.slice(name, 0, idx)
+              | Some(idx) => String.slice(name, ~start=0, ~end_=idx)
             }
             let attrs = parseAttrs(header)
             let (innerBlocks, nextIndex) = parseBlocks(lines, i + 1, true)
