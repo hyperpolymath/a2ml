@@ -1,6 +1,6 @@
 {
   "imports": {
-    "@rescript/runtime/": "npm:@rescript/runtime/"
+    "@rescript/runtime/": "npm:@rescript/runtime@latest/"
   },
   "permissions": {
     "read": true
