@@ -202,7 +202,9 @@ vectors:
         echo "rescript not found; install the ReScript compiler." >&2; \
         exit 1; \
       fi
-    @if command -v deno >/dev/null 2>&1; then \
+    @if [ -x /home/hyper/.deno/bin/deno ]; then \
+        /home/hyper/.deno/bin/deno run --config prototype/rescript/deno.json prototype/rescript/src/RunVectors.bs.js; \
+      elif command -v deno >/dev/null 2>&1; then \
         deno run --config prototype/rescript/deno.json prototype/rescript/src/RunVectors.bs.js; \
       elif command -v node >/dev/null 2>&1; then \
         node prototype/rescript/src/RunVectors.bs.js; \
@@ -221,7 +223,9 @@ vectors-report:
         echo "rescript not found; install the ReScript compiler." >&2; \
         exit 1; \
       fi
-    @if command -v deno >/dev/null 2>&1; then \
+    @if [ -x /home/hyper/.deno/bin/deno ]; then \
+        /home/hyper/.deno/bin/deno run --config prototype/rescript/deno.json prototype/rescript/src/RunReport.bs.js; \
+      elif command -v deno >/dev/null 2>&1; then \
         deno run --config prototype/rescript/deno.json prototype/rescript/src/RunReport.bs.js; \
       elif command -v node >/dev/null 2>&1; then \
         node prototype/rescript/src/RunReport.bs.js; \
@@ -238,7 +242,9 @@ dump-ast path:
         echo "rescript not found; install the ReScript compiler." >&2; \
         exit 1; \
       fi
-    @if command -v deno >/dev/null 2>&1; then \
+    @if [ -x /home/hyper/.deno/bin/deno ]; then \
+        /home/hyper/.deno/bin/deno run --config prototype/rescript/deno.json prototype/rescript/src/DumpAst.bs.js {{path}}; \
+      elif command -v deno >/dev/null 2>&1; then \
         deno run --config prototype/rescript/deno.json prototype/rescript/src/DumpAst.bs.js {{path}}; \
       elif command -v node >/dev/null 2>&1; then \
         node prototype/rescript/src/DumpAst.bs.js {{path}}; \
@@ -281,7 +287,9 @@ cli *args:
         echo "rescript not found; install the ReScript compiler." >&2; \
         exit 1; \
       fi
-    @if command -v deno >/dev/null 2>&1; then \
+    @if [ -x /home/hyper/.deno/bin/deno ]; then \
+        /home/hyper/.deno/bin/deno run --config prototype/rescript/deno.json prototype/rescript/src/Cli.bs.js {{args}}; \
+      elif command -v deno >/dev/null 2>&1; then \
         deno run --config prototype/rescript/deno.json prototype/rescript/src/Cli.bs.js {{args}}; \
       elif command -v node >/dev/null 2>&1; then \
         node prototype/rescript/src/Cli.bs.js {{args}}; \
