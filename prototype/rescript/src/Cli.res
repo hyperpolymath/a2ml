@@ -38,7 +38,7 @@ let helpText = "A2ML CLI (prototype)\n\n" ++
   "  * For multiple files, --concat joins outputs in order.\n"
 
 let usage = (): unit => {
-  Js.log(helpText)
+  Console.log(helpText)
   exit(1)
 }
 
@@ -69,7 +69,7 @@ let collectInputs = (args: array<string>): array<string> => {
       inputs
     } else {
       let arg = Belt.Array.getExn(args, i)
-      if Js.String2.startsWith(arg, "-") {
+  if String.startsWith(arg, "-") {
         inputs
       } else {
         inputs->Belt.Array.push(arg)

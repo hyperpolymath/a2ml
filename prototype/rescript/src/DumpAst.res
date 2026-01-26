@@ -5,16 +5,23 @@ module Fs = {
   external readFileSync: (string, string) => string = "readFileSync"
 }
 
+@val external argv: array<string> = "process.argv"
+
 let _ = {
   // Usage: node DumpAst.bs.js path/to/file.a2ml
-  let args = Js.Sys.argv
+  let args = argv
   if Belt.Array.length(args) < 3 {
-    Js.log("Usage: dump-ast <path>")
+    Console.log("Usage: dump-ast <path>")
   } else {
     let path = args->Belt.Array.getExn(2)
     let input = Fs.readFileSync(path, "utf8")
     let doc = A2ml.parse(input)
     let json = Json.docToJson(doc)
-    Js.log(Js.Json.stringifyAny(json))
+    let out =
+      switch JSON.stringifyAny(json) {
+      | Some(value) => value
+      | None => "{}"
+      }
+    Console.log(out)
   }
 }
