@@ -14,18 +14,18 @@ module Fs = {
 }
 
 let listVectors = (): array<(string, string)> => {
-  let files = Fs.readdirSync("tests/vectors")
-  files
-  ->Belt.Array.keep(file => Js.String2.endsWith(file, ".a2ml"))
-  ->Belt.Array.map(file => {
-      let expected = Js.String2.replace(file, ".a2ml", ".expected")
-      ("tests/vectors/" ++ file, "tests/vectors/" ++ expected)
-    })
+let files = Fs.readdirSync("tests/vectors")
+files
+->Belt.Array.keep(file => String.endsWith(file, ".a2ml"))
+->Belt.Array.map(file => {
+    let expected = String.replace(file, ".a2ml", ".expected")
+    ("tests/vectors/" ++ file, "tests/vectors/" ++ expected)
+  })
 }
 
 let parseExpected = (text: string): option<string> => {
   let lines = String.split(text, "\n")
-  let errorLine = lines->Belt.Array.keep(line => Js.String2.startsWith(line, "ERROR:"))
+  let errorLine = lines->Belt.Array.keep(line => String.startsWith(line, "ERROR:"))
   if Belt.Array.length(errorLine) > 0 {
     Some(String.trim(String.slice(errorLine->Belt.Array.getExn(0), ~start=6)))
   } else {
@@ -36,7 +36,7 @@ let parseExpected = (text: string): option<string> => {
 let normalizeHtml = (html: string): string => {
   // Collapse whitespace for stable comparison.
   let re = %re("/\\s+/")
-  Js.String.replaceByRe(html, re, " ")->String.trim
+  String.replaceByRe(re, " ", html)->String.trim
 }
 
 let run = (): int => {

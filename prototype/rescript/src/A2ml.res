@@ -215,7 +215,7 @@ let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): 
   loop(startIndex)
 }
 
-let parse = (~mode: parseMode=Lax, input: string): doc => {
+let parse = (~_mode: parseMode=Lax, input: string): doc => {
   let lines = String.split(input, "\n")
   let (blocks, _index) = parseBlocks(lines, 0, false)
   blocks
