@@ -61,6 +61,7 @@ A2ML is a typed, attested markup format. It verifies structure and references.
 
 * link:docs/ANNOUNCEMENT.adoc[Announcement Draft]
 * link:docs/STATE-OF-A2ML.adoc[State of A2ML]
+* link:docs/V1-CRITERIA.adoc[v1.0.0 Criteria]
 
 == Status
 

@@ -20,21 +20,25 @@ Design phase complete. v0.1.0 published with spec drafts, prototypes, and\n+conf
 * [ ] HTML renderer (basic)
 * [ ] Lax/checked mode validation
 * [ ] Publish web demo page
+* Target: 2026-03
 
 === v0.3.0 - Attestation Core
 * [ ] Idris2 typed core encoding
 * [ ] Proof obligations for invariants
 * [ ] Opaque payload round-trip tests
+* Target: 2026-05
 
 === v0.4.0 - Web Rendering
 * [ ] JS/Rescript parser/renderer
 * [ ] Web component for client-side rendering
 * [ ] WASM demo page (rescript-wasm-runtime)
+* Target: 2026-07
 
 === v1.0.0 - Stable
 * [ ] Spec stabilization and IANA submission
 * [ ] Compatibility tests across renderers
 * [ ] Formal conformance suite
+* Target: 2026-10
 
 == Future Directions
 
@@ -42,3 +46,7 @@ Design phase complete. v0.1.0 published with spec drafts, prototypes, and\n+conf
 * PDF/LaTeX renderers
 * Policy bundles for domain-specific invariants
 * Signed attestation metadata and canonical hash format
+
+== v1.0.0 Criteria
+
+See link:docs/V1-CRITERIA.adoc[V1-CRITERIA] for the acceptance checklist.
