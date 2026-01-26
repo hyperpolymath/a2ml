@@ -1,0 +1,24 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= A2ML CLI (Prototype)
+
+This CLI is a lightweight wrapper around the ReScript prototype parser.
+
+== Commands
+
+* `render <file>` — render HTML to stdout
+* `validate <file>` — validate (checked mode) and exit nonzero on errors
+* `ast <file>` — output JSON surface AST
+
+== Options
+
+* `--mode lax|checked` (default: lax)
+* `--out <path>` to write output to a file
+
+== Run
+
+[source,bash]
+----
+just cli render tests/vectors/module0-basic.a2ml
+just cli validate tests/vectors/module0-basic.a2ml
+just cli ast tests/vectors/module0-basic.a2ml --out /tmp/ast.json
+----

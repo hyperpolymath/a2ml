@@ -230,6 +230,23 @@ core-tests:
         echo "idris2 not found; install Idris2 to run core tests." >&2; \
         exit 1; \
       fi
+
+# Run CLI (prototype)
+cli *args:
+    @if command -v rescript >/dev/null 2>&1; then \
+        rescript build -with-deps; \
+      else \
+        echo "rescript not found; install the ReScript compiler." >&2; \
+        exit 1; \
+      fi
+    @if command -v deno >/dev/null 2>&1; then \
+        deno run --config prototype/rescript/deno.json prototype/rescript/src/Cli.bs.js {{args}}; \
+      elif command -v node >/dev/null 2>&1; then \
+        node prototype/rescript/src/Cli.bs.js {{args}}; \
+      else \
+        echo "Neither deno nor node found; install one to run the CLI." >&2; \
+        exit 1; \
+      fi
     @if command -v deno >/dev/null 2>&1; then \
         deno run --config prototype/rescript/deno.json prototype/rescript/src/RunVectors.bs.js; \
       elif command -v node >/dev/null 2>&1; then \

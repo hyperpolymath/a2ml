@@ -71,6 +71,10 @@ A2ML is a typed, attested markup format. It verifies structure and references.
 
 * `just core-tests` (Idris2)
 
+== CLI
+
+* link:docs/CLI.adoc[CLI (prototype)]
+
 == Release Notes
 
 * link:RELEASE-NOTES-v0.1.0.adoc[v0.1.0 Release Notes]
