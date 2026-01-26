@@ -54,6 +54,10 @@ A2ML is a typed, attested markup format. It verifies structure and references.
 * link:prototype/wasm/README.adoc[ReScript + WASM Prototype]
 * link:prototype/ddraig/DemoBuild.idr[ddraig-ssg demo build]
 
+== Idris2 Core
+
+* link:src/TypedCore.idr[Typed core stub]
+
 == Release Notes
 
 * link:RELEASE-NOTES-v0.1.0.adoc[v0.1.0 Release Notes]

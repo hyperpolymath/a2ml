@@ -8,6 +8,9 @@ module Fs = {
 
   @module("fs")
   external readFileSync: (string, string) => string = "readFileSync"
+
+  @module("fs")
+  external existsSync: string => bool = "existsSync"
 }
 
 let listVectors = (): array<(string, string)> => {
@@ -28,6 +31,12 @@ let parseExpected = (text: string): option<string> => {
   } else {
     None
   }
+}
+
+let normalizeHtml = (html: string): string => {
+  // Collapse whitespace for stable comparison.
+  let re = %re("\\s+")
+  Js.String.replaceByRe(html, re, " ")->String.trim
 }
 
 let run = (): int => {
@@ -56,6 +65,15 @@ let run = (): int => {
             failures->Belt.Array.push(inputPath ++ ": error mismatch")
           }
         }
+    }
+
+    let htmlExpectedPath = Js.String2.replace(inputPath, ".a2ml", ".html.expected")
+    if Fs.existsSync(htmlExpectedPath) {
+      let actualHtml = A2ml.renderHtml(doc)->normalizeHtml
+      let expectedHtml = Fs.readFileSync(htmlExpectedPath, "utf8")->normalizeHtml
+      if actualHtml != expectedHtml {
+        failures->Belt.Array.push(inputPath ++ ": html mismatch")
+      }
     }
   })
 

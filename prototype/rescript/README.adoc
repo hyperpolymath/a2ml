@@ -21,4 +21,4 @@ and conformance rules in `docs/CONFORMANCE.adoc`.
 
 == Vectors
 
-`src/VectorRunner.res` provides a minimal vector runner for `tests/vectors/`.
+`src/VectorRunner.res` provides a minimal vector runner for `tests/vectors/`.\n+If a matching `*.html.expected` file exists, HTML output is compared too.

@@ -189,6 +189,10 @@ docs:
     just man
     @echo "Documentation generated in docs/"
 
+# Build the ddraig-ssg demo page
+demo:
+    @./scripts/build-demo-ddraig.sh
+
 # Generate justfile cookbook documentation
 cookbook:
     #!/usr/bin/env bash
