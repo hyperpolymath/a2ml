@@ -228,9 +228,13 @@ let rec renderBlocks = (blocks: array<block>): string => {
       | List(items) =>
           let lis = items->Belt.Array.map(item => "<li>" ++ renderInline(item) ++ "</li>")->Belt.Array.joinWith("")
           "<ul>" ++ lis ++ "</ul>"
-      | Directive(name, _attrs, body) =>
+      | Directive(name, attrs, body) =>
           let content = renderBlocks(body)
-          "<div data-a2ml=\"" ++ name ++ "\">" ++ content ++ "</div>"
+          let attrsString = attrs
+            ->Belt.Array.map(((k, v)) => k ++ "=\"" ++ v ++ "\"")
+            ->Belt.Array.joinWith(" ")
+          let dataAttr = if attrsString == "" {""} else {" " ++ attrsString}
+          "<div data-a2ml=\"" ++ name ++ "\"" ++ dataAttr ++ ">" ++ content ++ "</div>"
       }
     )
   ->Belt.Array.joinWith("\n")

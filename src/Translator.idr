@@ -4,13 +4,13 @@ import A2ML.TypedCore
 import A2ML.Surface
 
 -- Minimal translation: headings become sections with generated IDs,
--- paragraphs and lists map directly, directives are ignored for now.
+-- paragraphs and lists map directly. Directives map based on name.
 
 translate : SDoc -> Doc
 translate (MkSDoc bs) = MkDoc (map toBlock bs)
   where
     mkId : String -> Id
-    mkId t = MkId ("sec:" ++ t)
+    mkId t = MkId t
 
     inlineToText : List Inline -> String
     inlineToText = concatMap toString
@@ -24,10 +24,32 @@ translate (MkSDoc bs) = MkDoc (map toBlock bs)
     listToText : List (List Inline) -> List String
     listToText xs = map inlineToText xs
 
+    attrLookup : String -> List (String, String) -> Maybe String
+    attrLookup _ [] = Nothing
+    attrLookup k ((k2, v) :: rest) = if k == k2 then Just v else attrLookup k rest
+
     toBlock : SBlock -> Block
-    toBlock (SHeading _ t) = Section (MkSec (mkId t) t [])
+    toBlock (SHeading _ t) = Section (MkSec (MkId ("sec:" ++ t)) t [])
     toBlock (SParagraph t) = Para (inlineToText t)
     toBlock (SList xs) = Bullet (listToText xs)
-    toBlock (SDirective _ _ body) =
-      -- For now, discard directive wrapper and translate its body
-      Section (MkSec (mkId "directive") "Directive" (map toBlock body))
+    toBlock (SDirective name attrs body) =
+      case name of
+        "fig" =>
+          let mid = attrLookup "id" attrs
+              mref = attrLookup "ref" attrs
+              caption = inlineToText (concatMap inlineFromBlock body)
+          in Figure (MkFig (mkId (maybe "fig:unnamed" id mid)) caption (map mkId mref))
+        "table" =>
+          let mid = attrLookup "id" attrs
+              caption = inlineToText (concatMap inlineFromBlock body)
+          in Table (MkTbl (mkId (maybe "tbl:unnamed" id mid)) caption)
+        "refs" =>
+          Refs []
+        "abstract" =>
+          Section (MkSec (mkId "sec:abstract") "Abstract" (map toBlock body))
+        _ =>
+          Section (MkSec (mkId ("sec:" ++ name)) name (map toBlock body))
+
+    inlineFromBlock : SBlock -> List Inline
+    inlineFromBlock (SParagraph xs) = xs
+    inlineFromBlock _ = []

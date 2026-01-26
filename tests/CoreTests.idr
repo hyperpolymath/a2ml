@@ -16,7 +16,8 @@ mkSurface : SDoc
 mkSurface = MkSDoc [
   SHeading 1 "Intro",
   SParagraph [SText "Hello"],
-  SList [[SText "Item"]]
+  SList [[SText "Item"]],
+  SDirective "fig" [("id", "fig:one"), ("ref", "sec:intro")] [SParagraph [SText "Caption"]]
   ]
 
 main : IO ()
