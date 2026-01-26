@@ -95,7 +95,10 @@ let validateDoc = (input: string, mode: A2ml.parseMode): array<A2ml.parseError> 
 
 let astDoc = (input: string, mode: A2ml.parseMode): string => {
   let doc = A2ml.parse(~mode, input)
-  Js.Json.stringifyAny(Json.docToJson(doc))
+  switch JSON.stringifyAny(Json.docToJson(doc)) {
+  | Some(value) => value
+  | None => "{}"
+  }
 }
 
 let _ = {
