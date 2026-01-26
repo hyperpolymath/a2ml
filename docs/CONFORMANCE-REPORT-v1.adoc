@@ -9,3 +9,16 @@
 == Artifacts
 
 * `build/vector-report.json` (from `just vectors-report`)
+* AST dumps for reference inputs (from `just dump-ast`)
+* Typed core checks (from `just core-tests`)
+
+== Procedure
+
+[source,bash]
+----
+just vectors-report
+just dump-ast tests/vectors/module0-basic.a2ml
+just core-tests
+----
+
+See link:docs/CONFORMANCE-PLAN-v1.adoc[v1 Conformance Plan] for scope.

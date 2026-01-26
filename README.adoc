@@ -43,10 +43,12 @@ A2ML is a typed, attested markup format. It verifies structure and references.
 * link:docs/MODULES.adoc[Syntax Modules (Opt-in)]
 * link:docs/GRAMMAR.adoc[Grammar Appendix]
 * link:docs/CONFORMANCE.adoc[Conformance + Test Vectors]
+* link:docs/CONFORMANCE-PLAN-v1.adoc[v1 Conformance Plan]
 * link:docs/WEB-RENDERING.adoc[Web Rendering Options]
 * link:docs/IANA-MEDIA-TYPE.adoc[IANA Media Type Draft]
 * link:docs/COMPARISON.adoc[Comparison Matrix]
 * link:docs/CITATIONS.adoc[Citation Guide]
+* link:docs/demo.html[Demo (HTML)]
 
 == Prototype
 

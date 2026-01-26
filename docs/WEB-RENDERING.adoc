@@ -44,7 +44,14 @@ See `prototype/wasm/` for a direct-to-WASM sketch using `rescript-wasm-runtime`.
 
 == Demo Generation (ddraig-ssg)
 
-The demo page is generated from `prototype/ddraig/content/demo.md` using\n+`scripts/build-demo-ddraig.sh`, which compiles and runs a small Idris driver\n+against the `ddraig-ssg` repo.
+The demo page is generated from `prototype/ddraig/content/demo.md` using
+`scripts/build-demo-ddraig.sh`, which compiles and runs a small Idris driver
+against the `ddraig-ssg` repo.
+
+[source,bash]
+----
+just demo
+----
 
 == Browser Usage (Plain JS)
 
