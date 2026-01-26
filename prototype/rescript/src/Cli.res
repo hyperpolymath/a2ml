@@ -24,28 +24,18 @@ let exit = (code: int): unit => {
   %raw(`(typeof Deno !== "undefined") ? Deno.exit(code) : process.exit(code)`)
 }
 
-let helpText = """
-A2ML CLI (prototype)
-
-Usage:
-  a2ml <render|validate|ast> <file...|-> [options]
-
-Commands:
-  render    Render HTML to stdout (or --out)
-  validate  Validate in checked mode, exit nonzero on errors
-  ast       Output JSON surface AST
-
-Options:
-  --mode <lax|checked>   Parse mode (default: lax)
-  --out <path>           Write output to file
-  --concat               Concatenate outputs when multiple inputs
-  --stdin                Read input from stdin (equivalent to '-')
-  -h, --help             Show this help
-
-Notes:
-  * Use '-' as a filename to read from stdin.
-  * For multiple files, --concat joins outputs in order.
-"""
+let helpText = "A2ML CLI (prototype)\n\n" ++
+  "Usage:\n  a2ml <render|validate|ast> <file...|-> [options]\n\n" ++
+  "Commands:\n  render    Render HTML to stdout (or --out)\n" ++
+  "  validate  Validate in checked mode, exit nonzero on errors\n" ++
+  "  ast       Output JSON surface AST\n\n" ++
+  "Options:\n  --mode <lax|checked>   Parse mode (default: lax)\n" ++
+  "  --out <path>           Write output to file\n" ++
+  "  --concat               Concatenate outputs when multiple inputs\n" ++
+  "  --stdin                Read input from stdin (equivalent to '-')\n" ++
+  "  -h, --help             Show this help\n\n" ++
+  "Notes:\n  * Use '-' as a filename to read from stdin.\n" ++
+  "  * For multiple files, --concat joins outputs in order.\n"
 
 let usage = (): unit => {
   Js.log(helpText)
@@ -68,7 +58,6 @@ let hasFlag = (args: array<string>, name: string): bool => {
 }
 
 let collectInputs = (args: array<string>): array<string> => {
-  // Inputs are all args after command until a flag
   let inputs = Belt.Array.make(0, "")
   let rec loop = i =>
     if i >= Belt.Array.length(args) {
@@ -96,7 +85,7 @@ let renderDoc = (input: string, mode: A2ml.parseMode): string => {
 
 let validateDoc = (input: string, mode: A2ml.parseMode): array<A2ml.parseError> => {
   let doc = A2ml.parse(~mode, input)
-  if mode == A2ml.Checked { A2ml.validateChecked(doc) } else { [||] }
+  if mode == A2ml.Checked { A2ml.validateChecked(doc) } else { [] }
 }
 
 let astDoc = (input: string, mode: A2ml.parseMode): string => {
@@ -121,7 +110,7 @@ let _ = {
   let outPath = getArg(args, "--out")
   let concat = hasFlag(args, "--concat")
 
-  let sources = if readFromStdin { [|"-"|] } else { inputs }
+  let sources = if readFromStdin { ["-"] } else { inputs }
   if Belt.Array.length(sources) == 0 { usage() }
 
   switch command {
@@ -135,7 +124,7 @@ let _ = {
   | "validate" =>
       let allErrors = sources
         ->Belt.Array.map(src => validateDoc(readInput(src), mode))
-        ->Belt.Array.reduce([||], (acc, errs) => Belt.Array.concat(acc, errs))
+        ->Belt.Array.reduce([], (acc, errs) => Belt.Array.concat(acc, errs))
       if Belt.Array.length(allErrors) == 0 {
         Js.log("ok")
       } else {
@@ -144,7 +133,7 @@ let _ = {
       }
   | "ast" =>
       let outputs = sources->Belt.Array.map(src => astDoc(readInput(src), mode))
-      let result = if concat { outputs->Belt.Array.joinWith("\n") } else { outputs->Belt.Array.joinWith("\n") }
+      let result = outputs->Belt.Array.joinWith("\n")
       switch outPath {
       | Some(p) => writeText(p, result)
       | None => Js.log(result)

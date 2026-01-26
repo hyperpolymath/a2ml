@@ -1,16 +1,6 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
 
-let demoDoc = #""
-# A2ML Overview
-
-@abstract:
-A2ML is a typed, attested markup format.
-@end
-
-## Claims
-- Required sections must exist.
-- References must resolve.
-""#
+let demoDoc = "# A2ML Overview\n\n@abstract:\nA2ML is a typed, attested markup format.\n@end\n\n## Claims\n- Required sections must exist.\n- References must resolve.\n"
 
 let _ = {
   let parsed = A2ml.parse(demoDoc)

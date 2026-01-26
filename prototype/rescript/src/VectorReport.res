@@ -35,7 +35,7 @@ let parseExpected = (text: string): option<string> => {
 }
 
 let normalizeHtml = (html: string): string => {
-  let re = %re("\\s+")
+  let re = %re("/\\s+/")
   Js.String.replaceByRe(html, re, " ")->String.trim
 }
 

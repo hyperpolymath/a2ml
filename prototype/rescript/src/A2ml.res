@@ -54,7 +54,7 @@ let parseAttrs = (line: string): attrs => {
   | Some(idx) => idx
   }
   if start == -1 || end_ == -1 || end_ < start {
-    [||]
+    []
   } else {
     let inner = String.slice(line, start + 1, end_)
     let parts = String.split(inner, ",")
@@ -84,35 +84,35 @@ let parseInline = (text: string): array<inline> => {
     } else if i + 1 < String.length(text) && String.sub(text, i, 2) == "**" {
       let close = String.indexFrom(text, i + 2, "**")
       switch close {
-      | None => loop(i + 2, Belt.Array.concat([|Text("**")|], acc))
+      | None => loop(i + 2, Belt.Array.concat([Text("**")], acc))
       | Some(j) =>
         let content = String.slice(text, i + 2, j)
-        loop(j + 2, Belt.Array.concat([|Strong(content)|], acc))
+        loop(j + 2, Belt.Array.concat([Strong(content)], acc))
       }
     } else if String.get(text, i) == '*' {
       let close = String.indexFrom(text, i + 1, "*")
       switch close {
-      | None => loop(i + 1, Belt.Array.concat([|Text("*")|], acc))
+      | None => loop(i + 1, Belt.Array.concat([Text("*")], acc))
       | Some(j) =>
         let content = String.slice(text, i + 1, j)
-        loop(j + 1, Belt.Array.concat([|Emph(content)|], acc))
+        loop(j + 1, Belt.Array.concat([Emph(content)], acc))
       }
     } else if String.get(text, i) == '[' {
       let closeText = String.indexFrom(text, i + 1, "]")
       switch closeText {
-      | None => loop(i + 1, Belt.Array.concat([|Text("[")|], acc))
+      | None => loop(i + 1, Belt.Array.concat([Text("[")], acc))
       | Some(j) =>
         if j + 1 < String.length(text) && String.get(text, j + 1) == '(' {
           let closeUrl = String.indexFrom(text, j + 2, ")")
           switch closeUrl {
-          | None => loop(i + 1, Belt.Array.concat([|Text("[")|], acc))
+          | None => loop(i + 1, Belt.Array.concat([Text("[")], acc))
           | Some(k) =>
             let label = String.slice(text, i + 1, j)
             let url = String.slice(text, j + 2, k)
-            loop(k + 1, Belt.Array.concat([|Link(label, url)|], acc))
+            loop(k + 1, Belt.Array.concat([Link(label, url)], acc))
           }
         } else {
-          loop(i + 1, Belt.Array.concat([|Text("[")|], acc))
+          loop(i + 1, Belt.Array.concat([Text("[")], acc))
         }
       }
     } else {
@@ -123,16 +123,20 @@ let parseInline = (text: string): array<inline> => {
             | Some(j) => Some(j)
             }
           })
-      let next = if Belt.Array.length(nextSpecial) == 0 {String.length(text)}
-        else Belt.Array.reduce(nextSpecial, String.length(text), (a, b) => if b < a {b} else {a})
+      let next =
+        if Belt.Array.length(nextSpecial) == 0 {
+          String.length(text)
+        } else {
+          Belt.Array.reduce(nextSpecial, String.length(text), (a, b) => if b < a {b} else {a})
+        }
       let chunk = String.slice(text, i, next)
-      loop(next, Belt.Array.concat([|Text(chunk)|], acc))
+      loop(next, Belt.Array.concat([Text(chunk)], acc))
     }
-  loop(0, [||])
+  loop(0, [])
 }
 
 let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): (array<block>, int) => {
-  let blocks = Belt.Array.make(0, Paragraph([||]))
+  let blocks = Belt.Array.make(0, Paragraph([]))
 
   let rec loop = i => {
     if i >= Belt.Array.length(lines) {
@@ -167,12 +171,12 @@ let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): 
                 let l = String.trim(Belt.Array.getExn(lines, j))
                 if String.startsWith(l, "-") {
                   let item = String.trim(String.sliceToEnd(l, 1))
-                  collect(j + 1, Belt.Array.concat(acc, [|parseInline(item)|]))
+                  collect(j + 1, Belt.Array.concat(acc, [parseInline(item)]))
                 } else {
                   (j, acc)
                 }
               }
-            let (nextIndex, items) = collect(i, [||])
+            let (nextIndex, items) = collect(i, [])
             blocks->Belt.Array.push(List(items))
             loop(nextIndex)
           } else {
@@ -183,10 +187,10 @@ let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): 
                 if String.trim(l) == "" || isDirectiveStart(l) || String.startsWith(String.trim(l), "-") || isHeading(l) != None {
                   (j, acc)
                 } else {
-                  collect(j + 1, Belt.Array.concat(acc, [|String.trim(l)|]))
+                  collect(j + 1, Belt.Array.concat(acc, [String.trim(l)]))
                 }
               }
-            let (nextIndex, parts) = collect(i, [||])
+            let (nextIndex, parts) = collect(i, [])
             let text = parts->Belt.Array.joinWith(" ")
             blocks->Belt.Array.push(Paragraph(parseInline(text)))
             loop(nextIndex)
@@ -286,7 +290,7 @@ let validate = (doc: doc): array<parseError> => {
 
 let validateChecked = (doc: doc): array<parseError> => {
   let errors = validate(doc)
-  let allowed = Belt.Set.String.fromArray([|
+  let allowed = Belt.Set.String.fromArray([
     "abstract",
     "refs",
     "fig",
@@ -294,7 +298,7 @@ let validateChecked = (doc: doc): array<parseError> => {
     "opaque",
     "section",
     "requires",
-  |])
+  ])
 
   let rec walk = (blocks: array<block>, depthLine: int) => {
     blocks->Belt.Array.forEachWithIndex((i, block) => {
