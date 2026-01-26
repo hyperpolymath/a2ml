@@ -5,6 +5,11 @@ module A2ML.TypedCore
 -- Minimal typed core stub for v0.2 development.
 
 public export
+record Id where
+  constructor MkId
+  raw : String
+
+public export
 record Doc where
   constructor MkDoc
   blocks : List Block
@@ -22,21 +27,21 @@ data Block
 public export
 record Sec where
   constructor MkSec
-  id : String
+  id : Id
   title : String
   body : List Block
 
 public export
 record Fig where
   constructor MkFig
-  id : String
+  id : Id
   caption : String
-  ref : Maybe String
+  ref : Maybe Id
 
 public export
 record Tbl where
   constructor MkTbl
-  id : String
+  id : Id
   caption : String
 
 public export
@@ -45,41 +50,50 @@ record Ref where
   label : String
 
 public export
+data RefTarget
+  = RefSection Id
+  | RefFigure Id
+  | RefTable Id
+
+public export
 record Payload where
   constructor MkPayload
-  id : Maybe String
+  id : Maybe Id
   lang : Maybe String
   bytes : String
 
 -- Executable checks (v0.2)
 
-collectIds : Doc -> List String
+collectIds : Doc -> List Id
 collectIds (MkDoc blocks) = concatMap collectBlock blocks
   where
-    collectBlock : Block -> List String
+    collectBlock : Block -> List Id
     collectBlock (Section s) = s.id :: collectIds (MkDoc s.body)
     collectBlock (Figure f) = [f.id]
     collectBlock (Table t) = [t.id]
-    collectBlock (Opaque p) = maybe [] (\x => [x]) p.id
+    collectBlock (Opaque p) = maybe [] (id => [rid]) p.id
     collectBlock _ = []
 
-collectRefs : Doc -> List String
+collectRefs : Doc -> List Id
 collectRefs (MkDoc blocks) = concatMap collectBlock blocks
   where
-    collectBlock : Block -> List String
+    collectBlock : Block -> List Id
     collectBlock (Section s) = collectRefs (MkDoc s.body)
-    collectBlock (Figure f) = maybe [] (\x => [x]) f.ref
+    collectBlock (Figure f) = maybe [] (id => [rid]) f.ref
     collectBlock _ = []
 
-contains : String -> List String -> Bool
-contains _ [] = False
-contains x (y :: ys) = if x == y then True else contains x ys
+idEq : Id -> Id -> Bool
+idEq (MkId a) (MkId b) = a == b
 
-hasDuplicate : List String -> Bool
+contains : Id -> List Id -> Bool
+contains _ [] = False
+contains x (y :: ys) = if idEq x y then True else contains x ys
+
+hasDuplicate : List Id -> Bool
 hasDuplicate [] = False
 hasDuplicate (x :: xs) = if contains x xs then True else hasDuplicate xs
 
-allIn : List String -> List String -> Bool
+allIn : List Id -> List Id -> Bool
 allIn [] _ = True
 allIn (x :: xs) ys = contains x ys && allIn xs ys
 
