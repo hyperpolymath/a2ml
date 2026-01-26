@@ -193,6 +193,12 @@ docs:
 demo:
     @./scripts/build-demo-ddraig.sh
 
+# Run vector checks (prototype runner)
+vectors:
+    @echo "Running vector checks..."
+    @echo "Note: requires ReScript build output and Node."
+    @node prototype/rescript/src/RunVectors.bs.js
+
 # Generate justfile cookbook documentation
 cookbook:
     #!/usr/bin/env bash
