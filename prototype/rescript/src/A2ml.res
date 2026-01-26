@@ -43,7 +43,7 @@ let isHeading = (line: string): option<(int, string)> => {
     }
   let hcount = countHashes(0, 0)
   if hcount > 0 && hcount <= 5 {
-    let text = String.trim(String.sliceToEnd(trimmed, hcount))
+    let text = String.trim(String.slice(trimmed, ~start=hcount))
     Some((hcount, text))
   } else {
     None
@@ -163,7 +163,7 @@ let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): 
         | None =>
           if isDirectiveStart(line) {
             let header = String.trim(line)
-            let name = String.sliceToEnd(header, 1)
+            let name = String.slice(header, ~start=1)
             let nameOnly = switch String.indexOf(name, ":") {
               | None => name
               | Some(idx) => String.slice(name, 0, idx)
@@ -177,7 +177,7 @@ let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): 
               if j >= Belt.Array.length(lines) { (j, acc) } else {
                 let l = String.trim(Belt.Array.getExn(lines, j))
                 if String.startsWith(l, "-") {
-                  let item = String.trim(String.sliceToEnd(l, 1))
+                  let item = String.trim(String.slice(l, ~start=1))
                   collect(j + 1, Belt.Array.concat(acc, [parseInline(item)]))
                 } else {
                   (j, acc)

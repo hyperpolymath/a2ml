@@ -28,7 +28,7 @@ let parseExpected = (text: string): option<string> => {
   let lines = String.split(text, "\n")
   let errorLine = lines->Belt.Array.keep(line => Js.String2.startsWith(line, "ERROR:"))
   if Belt.Array.length(errorLine) > 0 {
-    Some(String.trim(String.sliceToEnd(errorLine->Belt.Array.getExn(0), 6)))
+    Some(String.trim(String.slice(errorLine->Belt.Array.getExn(0), ~start=6)))
   } else {
     None
   }
