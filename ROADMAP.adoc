@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= A2ML Roadmap
+
+== Current Status
+
+Design phase. Draft spec and modular surface grammar complete.
+
+== Milestones
+
+=== v0.1.0 - Spec Freeze (Draft)
+* [x] Surface grammar draft
+* [x] Typed core outline
+* [x] Module 0 quickstart
+* [ ] Formal grammar appendix (EBNF + tokens)
+* [ ] Conformance and test vectors
+
+=== v0.2.0 - Reference Parser (Prototype)
+* [ ] Module 0 parser (surface -> AST)
+* [ ] HTML renderer (basic)
+* [ ] Lax/checked mode validation
+
+=== v0.3.0 - Attestation Core
+* [ ] Idris2 typed core encoding
+* [ ] Proof obligations for invariants
+* [ ] Opaque payload round-trip tests
+
+=== v0.4.0 - Web Rendering
+* [ ] JS/Rescript parser/renderer
+* [ ] Web component for client-side rendering
+
+=== v1.0.0 - Stable
+* [ ] Spec stabilization and IANA submission
+* [ ] Compatibility tests across renderers
+* [ ] Formal conformance suite
+
+== Future Directions
+
+* Additional surface syntax variants (Djot-compatible, strict mode)
+* PDF/LaTeX renderers
+* Policy bundles for domain-specific invariants
