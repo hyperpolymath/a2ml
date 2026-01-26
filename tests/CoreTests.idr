@@ -1,0 +1,34 @@
+module A2ML.CoreTests
+
+import A2ML.TypedCore
+import A2ML.Surface
+import A2ML.Translator
+
+-- Simple sanity tests for v0.2
+
+mkSampleDoc : Doc
+mkSampleDoc = MkDoc [
+  Section (MkSec (MkId "sec:abstract") "Abstract" [Para "Hello"]),
+  Figure (MkFig (MkId "fig:one") "Fig" (Just (MkId "sec:abstract")))
+  ]
+
+mkSurface : SDoc
+mkSurface = MkSDoc [
+  SHeading 1 "Intro",
+  SParagraph [SText "Hello"],
+  SList [[SText "Item"]]
+  ]
+
+main : IO ()
+main = do
+  let errs = validateDoc mkSampleDoc
+  if errs == [] then
+    putStrLn "validateDoc: ok"
+  else
+    putStrLn ("validateDoc: failed: " ++ show errs)
+
+  let core = translate mkSurface
+  if uniqueIdsB core then
+    putStrLn "translate: ok"
+  else
+    putStrLn "translate: duplicate ids"

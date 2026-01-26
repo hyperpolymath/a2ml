@@ -202,6 +202,23 @@ vectors:
         echo "rescript not found; install the ReScript compiler." >&2; \
         exit 1; \
       fi
+
+# Dump A2ML surface AST as JSON
+dump-ast path:
+    @if command -v rescript >/dev/null 2>&1; then \
+        rescript build -with-deps; \
+      else \
+        echo "rescript not found; install the ReScript compiler." >&2; \
+        exit 1; \
+      fi
+    @if command -v deno >/dev/null 2>&1; then \
+        deno run --config prototype/rescript/deno.json prototype/rescript/src/DumpAst.bs.js {{path}}; \
+      elif command -v node >/dev/null 2>&1; then \
+        node prototype/rescript/src/DumpAst.bs.js {{path}}; \
+      else \
+        echo "Neither deno nor node found; install one to dump AST." >&2; \
+        exit 1; \
+      fi
     @if command -v deno >/dev/null 2>&1; then \
         deno run --config prototype/rescript/deno.json prototype/rescript/src/RunVectors.bs.js; \
       elif command -v node >/dev/null 2>&1; then \
