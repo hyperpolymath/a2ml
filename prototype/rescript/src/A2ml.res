@@ -35,6 +35,16 @@ let isChar = (s: string, i: int, ch: string): bool => {
   }
 }
 
+let indexOfOpt = (s: string, sub: string): option<int> => {
+  let idx = String.indexOf(s, sub)
+  if idx < 0 { None } else { Some(idx) }
+}
+
+let indexFromOpt = (s: string, start: int, sub: string): option<int> => {
+  let idx = String.indexFrom(s, start, sub)
+  if idx < 0 { None } else { Some(idx) }
+}
+
 let isHeading = (line: string): option<(int, string)> => {
   let trimmed = String.trim(line)
   let rec countHashes = (i, count) =>
@@ -52,11 +62,11 @@ let isHeading = (line: string): option<(int, string)> => {
 
 let parseAttrs = (line: string): attrs => {
   // Parse "@name(a=b,c=d):" into [("a","b"),("c","d")]
-  let start = switch String.indexOf(line, "(") {
+  let start = switch indexOfOpt(line, "(") {
   | None => -1
   | Some(idx) => idx
   }
-  let end_ = switch String.indexOf(line, ")") {
+  let end_ = switch indexOfOpt(line, ")") {
   | None => -1
   | Some(idx) => idx
   }
@@ -89,7 +99,7 @@ let parseInline = (text: string): array<inline> => {
     if i >= String.length(text) {
       Belt.Array.reverse(acc)
     } else if i + 1 < String.length(text) && String.sub(text, i, 2) == "**" {
-      let close = String.indexFrom(text, i + 2, "**")
+      let close = indexFromOpt(text, i + 2, "**")
       switch close {
       | None => loop(i + 2, Belt.Array.concat([Text("**")], acc))
       | Some(j) =>
@@ -97,7 +107,7 @@ let parseInline = (text: string): array<inline> => {
         loop(j + 2, Belt.Array.concat([Strong(content)], acc))
       }
     } else if isChar(text, i, "*") {
-      let close = String.indexFrom(text, i + 1, "*")
+      let close = indexFromOpt(text, i + 1, "*")
       switch close {
       | None => loop(i + 1, Belt.Array.concat([Text("*")], acc))
       | Some(j) =>
@@ -105,12 +115,12 @@ let parseInline = (text: string): array<inline> => {
         loop(j + 1, Belt.Array.concat([Emph(content)], acc))
       }
     } else if isChar(text, i, "[") {
-      let closeText = String.indexFrom(text, i + 1, "]")
+      let closeText = indexFromOpt(text, i + 1, "]")
       switch closeText {
       | None => loop(i + 1, Belt.Array.concat([Text("[")], acc))
       | Some(j) =>
         if j + 1 < String.length(text) && isChar(text, j + 1, "(") {
-          let closeUrl = String.indexFrom(text, j + 2, ")")
+          let closeUrl = indexFromOpt(text, j + 2, ")")
           switch closeUrl {
           | None => loop(i + 1, Belt.Array.concat([Text("[")], acc))
           | Some(k) =>
@@ -124,12 +134,7 @@ let parseInline = (text: string): array<inline> => {
       }
     } else {
       let nextSpecial = ["*", "["]
-        ->Belt.Array.keepMap(ch => {
-            switch String.indexFrom(text, i, ch) {
-            | None => None
-            | Some(j) => Some(j)
-            }
-          })
+        ->Belt.Array.keepMap(ch => indexFromOpt(text, i, ch))
       let next =
         if Belt.Array.length(nextSpecial) == 0 {
           String.length(text)
@@ -164,7 +169,7 @@ let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): 
           if isDirectiveStart(line) {
             let header = String.trim(line)
             let name = String.slice(header, ~start=1)
-            let nameOnly = switch String.indexOf(name, ":") {
+            let nameOnly = switch indexOfOpt(name, ":") {
               | None => name
               | Some(idx) => String.slice(name, 0, idx)
             }
