@@ -32,7 +32,7 @@ Interoperability considerations:
   Renderers should preserve content where possible and report transformations.
 
 Published specification:
-  (Provide the A2ML specification URL and version, e.g., "A2ML v0.1 Spec".)
+  A2ML v0 draft specification (see SPEC.adoc in the project repository).
 
 Applications which use this media type:
   A2ML compilers, renderers, and validators; static site generators; web
@@ -71,6 +71,24 @@ Intended usage:
 Other information & comments:
   A2ML is a typed, attested markup language intended for long-term document
   fidelity and verifiable structure.
+
+Recommended interim HTTP usage:
+
+* `Content-Type: application/vnd.a2ml`
+* `Content-Type: application/vnd.a2ml; charset=utf-8` (only if the document is
+  pure text without opaque binary payloads)
+
+Recommended HTML embedding (prototype):
+
+[source,html]
+----
+<script type="application/vnd.a2ml" id="doc">
+# A2ML Overview
+@abstract:
+A2ML is a typed, attested markup format.
+@end
+</script>
+----
 
 Contact person:
   (Your name and email.)

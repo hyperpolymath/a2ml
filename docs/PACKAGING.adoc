@@ -13,3 +13,4 @@ It compiles the ReScript CLI and runs it via Deno or Node.
 
 * Standalone CLI artifact (GitHub Release)
 * Checksums and reproducible build notes
+* Media type registration draft (see `docs/IANA-MEDIA-TYPE.adoc`)

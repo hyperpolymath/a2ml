@@ -3,7 +3,8 @@
 
 == Current Status
 
-Design phase complete. v0.1.0 published with spec drafts, prototypes, and\n+conformance targets.
+Design phase complete. v0.6.0 draft includes hardened Module 0 parsing,
+aligned vectors, and refreshed docs.
 
 == Milestones
 
@@ -16,10 +17,10 @@ Design phase complete. v0.1.0 published with spec drafts, prototypes, and\n+conf
 * [x] Release notes + announcement draft
 
 === v0.2.0 - Reference Parser (Prototype)
-* [~] Module 0 parser (surface -> AST) (prototype in `prototype/rescript/`)
-* [~] HTML renderer (basic) (prototype in `prototype/rescript/`)
-* [~] Lax/checked mode validation (basic)
-* [ ] Publish web demo page
+* [x] Module 0 parser (surface -> AST) (prototype in `prototype/rescript/`)
+* [x] HTML renderer (basic) (prototype in `prototype/rescript/`)
+* [x] Lax/checked mode validation (basic)
+* [~] Publish web demo page
 * Target: 2026-03
 
 === v0.3.0 - Attestation Core
@@ -27,6 +28,13 @@ Design phase complete. v0.1.0 published with spec drafts, prototypes, and\n+conf
 * [ ] Proof obligations for invariants
 * [ ] Opaque payload round-trip tests
 * Target: 2026-05
+
+=== v0.6.0 - Prototype Hardening
+* [x] Directive parsing tightened (`@refs`, `@opaque`, attrs)
+* [x] Vector suite aligned and passing
+* [x] CLI docs and help updated
+* [ ] Web demo published
+* Target: 2026-02
 
 === v0.4.0 - Web Rendering
 * [ ] JS/Rescript parser/renderer
