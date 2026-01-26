@@ -96,9 +96,12 @@ let _ = {
   Fs.writeFileSync("build/vector-report.json", json)
   let failures = results->Belt.Array.keep(r => !r.ok)
   if Belt.Array.length(failures) == 0 {
-    Js.log("All vectors passed")
+  Console.log("All vectors passed")
   } else {
-    failures->Belt.Array.forEach(r => Js.Console.error(`${r.file}: ${r.errors->Belt.Array.joinWith(", ")}`))
+  failures
+  ->Belt.Array.forEach(r =>
+      Console.error(`${r.file}: ${r.errors->Belt.Array.joinWith(", ", s => s)}`)
+    )
     %raw(`(typeof Deno !== "undefined") ? Deno.exit(2) : process.exit(2)`)
   }
 }

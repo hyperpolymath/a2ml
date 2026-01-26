@@ -78,10 +78,10 @@ let htmlExpectedPath = String.replace(inputPath, ".a2ml", ".html.expected")
   })
 
   if Belt.Array.length(failures) == 0 {
-    Js.log("All vectors passed")
+  Console.log("All vectors passed")
     0
   } else {
-    failures->Belt.Array.forEach(msg => Js.log(msg))
+  failures->Belt.Array.forEach(msg => Console.log(msg))
     1
   }
 }

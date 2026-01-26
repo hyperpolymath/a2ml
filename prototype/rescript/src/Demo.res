@@ -7,6 +7,6 @@ let _ = {
   let html = A2ml.renderHtml(parsed)
   let errors = A2ml.validateChecked(parsed)
   // Replace with DOM updates in a real web integration.
-  Js.log(html)
-  Js.log(errors)
+  Console.log(html)
+  Console.log(errors)
 }
