@@ -90,7 +90,7 @@ let parseAttrs = (line: string): attrs => {
 }
 
 let isDirectiveStart = (line: string): bool => {
-  String.startsWith(String.trim(line), "@") && Js.String2.includes(line, ":")
+  String.startsWith(String.trim(line), "@") && String.includes(line, ":")
 }
 
 let parseInline = (text: string): array<inline> => {
@@ -98,7 +98,7 @@ let parseInline = (text: string): array<inline> => {
   let rec loop = (i, acc) =>
     if i >= String.length(text) {
       Belt.Array.reverse(acc)
-    } else if i + 1 < String.length(text) && String.sub(text, i, 2) == "**" {
+    } else if i + 1 < String.length(text) && String.slice(text, ~start=i, ~end=i + 2) == "**" {
       let close = indexFromOpt(text, i + 2, "**")
       switch close {
       | None => loop(i + 2, Belt.Array.concat([Text("**")], acc))
