@@ -28,11 +28,18 @@ type parseError = {
   msg: string,
 }
 
+let isChar = (s: string, i: int, ch: string): bool => {
+  switch String.get(s, i) {
+  | Some(c) => c == ch
+  | None => false
+  }
+}
+
 let isHeading = (line: string): option<(int, string)> => {
   let trimmed = String.trim(line)
   let rec countHashes = (i, count) =>
     if i >= String.length(trimmed) {count} else {
-      if String.get(trimmed, i) == '#' {countHashes(i + 1, count + 1)} else {count}
+      if isChar(trimmed, i, "#") {countHashes(i + 1, count + 1)} else {count}
     }
   let hcount = countHashes(0, 0)
   if hcount > 0 && hcount <= 5 {
@@ -89,7 +96,7 @@ let parseInline = (text: string): array<inline> => {
         let content = String.slice(text, i + 2, j)
         loop(j + 2, Belt.Array.concat([Strong(content)], acc))
       }
-    } else if String.get(text, i) == '*' {
+    } else if isChar(text, i, "*") {
       let close = String.indexFrom(text, i + 1, "*")
       switch close {
       | None => loop(i + 1, Belt.Array.concat([Text("*")], acc))
@@ -97,12 +104,12 @@ let parseInline = (text: string): array<inline> => {
         let content = String.slice(text, i + 1, j)
         loop(j + 1, Belt.Array.concat([Emph(content)], acc))
       }
-    } else if String.get(text, i) == '[' {
+    } else if isChar(text, i, "[") {
       let closeText = String.indexFrom(text, i + 1, "]")
       switch closeText {
       | None => loop(i + 1, Belt.Array.concat([Text("[")], acc))
       | Some(j) =>
-        if j + 1 < String.length(text) && String.get(text, j + 1) == '(' {
+        if j + 1 < String.length(text) && isChar(text, j + 1, "(") {
           let closeUrl = String.indexFrom(text, j + 2, ")")
           switch closeUrl {
           | None => loop(i + 1, Belt.Array.concat([Text("[")], acc))
