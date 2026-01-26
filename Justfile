@@ -202,6 +202,33 @@ vectors:
         echo "rescript not found; install the ReScript compiler." >&2; \
         exit 1; \
       fi
+    @if command -v deno >/dev/null 2>&1; then \
+        deno run --config prototype/rescript/deno.json prototype/rescript/src/RunVectors.bs.js; \
+      elif command -v node >/dev/null 2>&1; then \
+        node prototype/rescript/src/RunVectors.bs.js; \
+      else \
+        echo "Neither deno nor node found; install one to run vector checks." >&2; \
+        exit 1; \
+      fi
+
+# Run vector checks and emit JSON report
+vectors-report:
+    @echo "Running vector checks (report)..."
+    @mkdir -p build
+    @if command -v rescript >/dev/null 2>&1; then \
+        rescript build -with-deps; \
+      else \
+        echo "rescript not found; install the ReScript compiler." >&2; \
+        exit 1; \
+      fi
+    @if command -v deno >/dev/null 2>&1; then \
+        deno run --config prototype/rescript/deno.json prototype/rescript/src/RunReport.bs.js; \
+      elif command -v node >/dev/null 2>&1; then \
+        node prototype/rescript/src/RunReport.bs.js; \
+      else \
+        echo "Neither deno nor node found; install one to run vector checks." >&2; \
+        exit 1; \
+      fi
 
 # Dump A2ML surface AST as JSON
 dump-ast path:
@@ -256,14 +283,6 @@ cli *args:
         node prototype/rescript/src/Cli.bs.js {{args}}; \
       else \
         echo "Neither deno nor node found; install one to run the CLI." >&2; \
-        exit 1; \
-      fi
-    @if command -v deno >/dev/null 2>&1; then \
-        deno run --config prototype/rescript/deno.json prototype/rescript/src/RunVectors.bs.js; \
-      elif command -v node >/dev/null 2>&1; then \
-        node prototype/rescript/src/RunVectors.bs.js; \
-      else \
-        echo "Neither deno nor node found; install one to run vector checks." >&2; \
         exit 1; \
       fi
 

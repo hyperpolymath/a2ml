@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v rescript >/dev/null 2>&1; then
+  echo "rescript not found; install the ReScript compiler." >&2
+  exit 1
+fi
+
+rescript build -with-deps
+
+if command -v deno >/dev/null 2>&1; then
+  exec deno run --config prototype/rescript/deno.json prototype/rescript/src/Cli.bs.js "$@"
+elif command -v node >/dev/null 2>&1; then
+  exec node prototype/rescript/src/Cli.bs.js "$@"
+else
+  echo "Neither deno nor node found; install one to run the CLI." >&2
+  exit 1
+fi

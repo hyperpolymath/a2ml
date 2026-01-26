@@ -1,0 +1,15 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= CLI Packaging (Prototype)
+
+== Wrapper Script
+
+The CLI is currently packaged as a wrapper script:
+
+* `bin/a2ml`
+
+It compiles the ReScript CLI and runs it via Deno or Node.
+
+== Planned v1
+
+* Standalone CLI artifact (GitHub Release)
+* Checksums and reproducible build notes
