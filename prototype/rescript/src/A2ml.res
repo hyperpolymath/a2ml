@@ -9,7 +9,7 @@ type block =
   | Heading(int, string)
   | Paragraph(string)
   | List(array<string>)
-  | Directive(string, attrs, array<string>)
+  | Directive(string, attrs, array<block>)
 
 type doc = array<block>
 
@@ -66,16 +66,21 @@ let parseAttrs = (line: string): attrs => {
   }
 }
 
-let parse = (~mode: parseMode=Lax, input: string): doc => {
-  let lines = String.split(input, "\n")
+let isDirectiveStart = (line: string): bool => {
+  String.startsWith(String.trim(line), "@") && String.contains(line, ":")
+}
+
+let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): (array<block>, int) => {
   let blocks = Belt.Array.make(0, Paragraph(""))
 
   let rec loop = i => {
     if i >= Belt.Array.length(lines) {
-      ()
+      (blocks, i)
     } else {
       let line = Belt.Array.getExn(lines, i)
-      if String.trim(line) == "" {
+      if stopAtEnd && String.trim(line) == "@end" {
+        (blocks, i + 1)
+      } else if String.trim(line) == "" {
         loop(i + 1)
       } else {
         switch isHeading(line) {
@@ -84,7 +89,7 @@ let parse = (~mode: parseMode=Lax, input: string): doc => {
             loop(i + 1)
           }
         | None =>
-          if String.startsWith(String.trim(line), "@") {
+          if isDirectiveStart(line) {
             let header = String.trim(line)
             let name = String.sliceToEnd(header, 1)
             let nameOnly = switch String.indexOf(name, ":") {
@@ -92,14 +97,8 @@ let parse = (~mode: parseMode=Lax, input: string): doc => {
               | Some(idx) => String.slice(name, 0, idx)
             }
             let attrs = parseAttrs(header)
-            let rec collect = (j, acc) =>
-              if j >= Belt.Array.length(lines) { (j, acc) } else {
-                let l = Belt.Array.getExn(lines, j)
-                if String.trim(l) == "@end" { (j + 1, acc) }
-                else { collect(j + 1, Belt.Array.concat(acc, [|l|])) }
-              }
-            let (nextIndex, body) = collect(i + 1, [||])
-            blocks->Belt.Array.push(Directive(nameOnly, attrs, body))
+            let (innerBlocks, nextIndex) = parseBlocks(lines, i + 1, true)
+            blocks->Belt.Array.push(Directive(nameOnly, attrs, innerBlocks))
             loop(nextIndex)
           } else if String.startsWith(String.trim(line), "-") {
             let rec collect = (j, acc) =>
@@ -116,20 +115,37 @@ let parse = (~mode: parseMode=Lax, input: string): doc => {
             blocks->Belt.Array.push(List(items))
             loop(nextIndex)
           } else {
-            blocks->Belt.Array.push(Paragraph(String.trim(line)))
-            loop(i + 1)
+            // Multi-line paragraph: continue until blank or structural block
+            let rec collect = (j, acc) =>
+              if j >= Belt.Array.length(lines) { (j, acc) } else {
+                let l = Belt.Array.getExn(lines, j)
+                if String.trim(l) == "" || isDirectiveStart(l) || String.startsWith(String.trim(l), "-") || isHeading(l) != None {
+                  (j, acc)
+                } else {
+                  collect(j + 1, Belt.Array.concat(acc, [|String.trim(l)|]))
+                }
+              }
+            let (nextIndex, parts) = collect(i, [||])
+            let text = parts->Belt.Array.joinWith(" ")
+            blocks->Belt.Array.push(Paragraph(text))
+            loop(nextIndex)
           }
         }
       }
     }
   }
 
-  loop(0)
+  loop(startIndex)
+}
+
+let parse = (~mode: parseMode=Lax, input: string): doc => {
+  let lines = String.split(input, "\n")
+  let (blocks, _index) = parseBlocks(lines, 0, false)
   blocks
 }
 
-let renderHtml = (doc: doc): string => {
-  doc
+let rec renderBlocks = (blocks: array<block>): string => {
+  blocks
   ->Belt.Array.map(block =>
       switch block {
       | Heading(level, text) =>
@@ -139,11 +155,15 @@ let renderHtml = (doc: doc): string => {
           let lis = items->Belt.Array.map(item => "<li>" ++ item ++ "</li>")->Belt.Array.joinWith("")
           "<ul>" ++ lis ++ "</ul>"
       | Directive(name, _attrs, body) =>
-          let content = body->Belt.Array.joinWith("\n")
+          let content = renderBlocks(body)
           "<div data-a2ml=\"" ++ name ++ "\">" ++ content ++ "</div>"
       }
     )
   ->Belt.Array.joinWith("\n")
+}
+
+let renderHtml = (doc: doc): string => {
+  renderBlocks(doc)
 }
 
 let validate = (doc: doc): array<parseError> => {
@@ -151,25 +171,31 @@ let validate = (doc: doc): array<parseError> => {
   let refs = Belt.Array.make(0, ("", 0))
   let errors = Belt.Array.make(0, {line: 0, msg: ""})
 
-  doc->Belt.Array.forEachWithIndex((i, block) => {
-    switch block {
-    | Directive(_name, attrs, _body) =>
-        attrs->Belt.Array.forEach(((k, v)) => {
-          if k == "id" {
-            if Belt.Set.String.has(ids, v) {
-              errors->Belt.Array.push({line: i + 1, msg: "duplicate id: " ++ v})
+  let rec walk = (blocks: array<block>, depthLine: int) => {
+    blocks->Belt.Array.forEachWithIndex((i, block) => {
+      let lineNo = depthLine + i + 1
+      switch block {
+      | Directive(_name, attrs, body) =>
+          attrs->Belt.Array.forEach(((k, v)) => {
+            if k == "id" {
+              if Belt.Set.String.has(ids, v) {
+                errors->Belt.Array.push({line: lineNo, msg: "duplicate id: " ++ v})
+              } else {
+                Belt.Set.String.add(ids, v)->ignore
+              }
+            } else if k == "ref" {
+              refs->Belt.Array.push((v, lineNo))
             } else {
-              Belt.Set.String.add(ids, v)->ignore
+              ()
             }
-          } else if k == "ref" {
-            refs->Belt.Array.push((v, i + 1))
-          } else {
-            ()
-          }
-        })
-    | _ => ()
-    }
-  })
+          })
+          walk(body, lineNo)
+      | _ => ()
+      }
+    })
+  }
+
+  walk(doc, 0)
 
   refs->Belt.Array.forEach(((refId, lineNo)) => {
     if !Belt.Set.String.has(ids, refId) {
