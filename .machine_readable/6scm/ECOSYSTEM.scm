@@ -15,7 +15,8 @@
       ("Lightweight surface syntax with typed attestation")))
 
   (related-projects
-    ("stateful-artefacts-for-gitforges"
+    ("standards"
+     "stateful-artefacts-for-gitforges"
      "k9-svc"))
 
   (what-this-is

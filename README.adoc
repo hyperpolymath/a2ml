@@ -8,6 +8,8 @@ A2ML is a lightweight, Djot-like markup that compiles into a typed, attested cor
 It keeps authoring simple while allowing strong structural guarantees when you
 want them.
 
+This repository is a satellite of the Hyperpolymath standards hub.
+
 == Why A2ML
 
 * Lightweight authoring with progressive strictness (lax -> checked -> attested)
@@ -39,10 +41,16 @@ A2ML is a typed, attested markup format. It verifies structure and references.
 * link:SPEC.adoc[Spec: Surface Grammar + Typed Core]
 * link:docs/QUICKSTART.adoc[Module 0 Quickstart + FAQ]
 * link:docs/MODULES.adoc[Syntax Modules (Opt-in)]
+* link:docs/GRAMMAR.adoc[Grammar Appendix]
+* link:docs/CONFORMANCE.adoc[Conformance + Test Vectors]
 * link:docs/WEB-RENDERING.adoc[Web Rendering Options]
 * link:docs/IANA-MEDIA-TYPE.adoc[IANA Media Type Draft]
 * link:docs/COMPARISON.adoc[Comparison Matrix]
 * link:docs/CITATIONS.adoc[Citation Guide]
+
+== Prototype
+
+* link:prototype/rescript/README.adoc[ReScript Web Prototype]
 
 == Status
 

@@ -33,6 +33,10 @@ let parse: (~mode: parseMode=?, string) => result<Ast.doc, string>
 let renderHtml: Ast.doc => string
 ----
 
+== Prototype (ReScript)
+
+See `prototype/rescript/` for a minimal Module 0 parser + HTML renderer sketch.
+
 == Browser Usage (Plain JS)
 
 [source,html]

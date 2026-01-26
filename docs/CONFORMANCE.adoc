@@ -1,0 +1,30 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= A2ML Conformance (Draft)
+:toc:
+:toclevels: 2
+
+This document defines conformance requirements and test vectors for A2ML v0.
+
+== Conformance Levels
+
+* **Parser Conformance**: Must accept Module 0 syntax and produce a surface AST.
+* **Checked Conformance**: Must reject unresolved references and duplicate IDs.
+* **Attested Conformance**: Must compile to typed core and discharge invariants.
+
+== Required Behaviors
+
+* Deterministic parsing for identical input bytes.
+* Exact preservation of opaque payloads.
+* Reference resolution in checked/attested modes.
+
+== Test Vectors
+
+Test vectors live in `tests/vectors/`.
+Each vector includes a `.a2ml` input and a human-readable `.expected` file
+that describes the required parse outcome.
+
+== Vector List (v0)
+
+* `module0-basic.a2ml` -> `module0-basic.expected`
+* `opaque-roundtrip.a2ml` -> `opaque-roundtrip.expected`
+* `refs-missing.a2ml` -> `refs-missing.expected`
