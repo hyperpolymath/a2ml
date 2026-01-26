@@ -51,7 +51,58 @@ record Payload where
   lang : Maybe String
   bytes : String
 
--- Placeholder invariants (proofs to be defined in v0.3)
+-- Executable checks (v0.2)
+
+collectIds : Doc -> List String
+collectIds (MkDoc blocks) = concatMap collectBlock blocks
+  where
+    collectBlock : Block -> List String
+    collectBlock (Section s) = s.id :: collectIds (MkDoc s.body)
+    collectBlock (Figure f) = [f.id]
+    collectBlock (Table t) = [t.id]
+    collectBlock (Opaque p) = maybe [] (\x => [x]) p.id
+    collectBlock _ = []
+
+collectRefs : Doc -> List String
+collectRefs (MkDoc blocks) = concatMap collectBlock blocks
+  where
+    collectBlock : Block -> List String
+    collectBlock (Section s) = collectRefs (MkDoc s.body)
+    collectBlock (Figure f) = maybe [] (\x => [x]) f.ref
+    collectBlock _ = []
+
+contains : String -> List String -> Bool
+contains _ [] = False
+contains x (y :: ys) = if x == y then True else contains x ys
+
+hasDuplicate : List String -> Bool
+hasDuplicate [] = False
+hasDuplicate (x :: xs) = if contains x xs then True else hasDuplicate xs
+
+allIn : List String -> List String -> Bool
+allIn [] _ = True
+allIn (x :: xs) ys = contains x ys && allIn xs ys
+
+uniqueIdsB : Doc -> Bool
+uniqueIdsB doc = not (hasDuplicate (collectIds doc))
+
+refsResolveB : Doc -> Bool
+refsResolveB doc = allIn (collectRefs doc) (collectIds doc)
+
+hasAbstractB : Doc -> Bool
+hasAbstractB (MkDoc blocks) = any isAbstract blocks
+  where
+    isAbstract : Block -> Bool
+    isAbstract (Section s) = s.title == "Abstract"
+    isAbstract _ = False
+
+validateDoc : Doc -> List String
+validateDoc doc =
+  let errs1 = if uniqueIdsB doc then [] else ["duplicate ids"]
+      errs2 = if refsResolveB doc then [] else ["unresolved references"]
+  in errs1 ++ errs2
+
+-- Placeholder proof types (v0.3+)
 public export
 UniqueIds : Doc -> Type
 UniqueIds _ = Unit

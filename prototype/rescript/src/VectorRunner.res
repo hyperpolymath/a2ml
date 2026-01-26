@@ -48,7 +48,7 @@ let run = (): int => {
     let expected = Fs.readFileSync(expectedPath, "utf8")
 
     let doc = A2ml.parse(input)
-    let errors = A2ml.validate(doc)
+    let errors = A2ml.validateChecked(doc)
     let expectedError = parseExpected(expected)
 
     switch expectedError {

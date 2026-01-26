@@ -22,6 +22,16 @@ type parseError = {
   msg: string,
 }
 
+let renderInline = (text: string): string => {
+  let strongRe = %re("/\\*\\*([^*]+)\\*\\*/g")
+  let emphRe = %re("/\\*([^*]+)\\*/g")
+  let linkRe = %re("/\\[([^\\]]+)\\]\\(([^)]+)\\)/g")
+  text
+  ->Js.String.replaceByRe(strongRe, "<strong>$1</strong>")
+  ->Js.String.replaceByRe(emphRe, "<em>$1</em>")
+  ->Js.String.replaceByRe(linkRe, "<a href=\"$2\">$1</a>")
+}
+
 let isHeading = (line: string): option<(int, string)> => {
   let trimmed = String.trim(line)
   let rec countHashes = (i, count) =>
@@ -150,9 +160,9 @@ let rec renderBlocks = (blocks: array<block>): string => {
       switch block {
       | Heading(level, text) =>
           "<h" ++ string_of_int(level) ++ ">" ++ text ++ "</h" ++ string_of_int(level) ++ ">"
-      | Paragraph(text) => "<p>" ++ text ++ "</p>"
+      | Paragraph(text) => "<p>" ++ renderInline(text) ++ "</p>"
       | List(items) =>
-          let lis = items->Belt.Array.map(item => "<li>" ++ item ++ "</li>")->Belt.Array.joinWith("")
+          let lis = items->Belt.Array.map(item => "<li>" ++ renderInline(item) ++ "</li>")->Belt.Array.joinWith("")
           "<ul>" ++ lis ++ "</ul>"
       | Directive(name, _attrs, body) =>
           let content = renderBlocks(body)
@@ -203,5 +213,35 @@ let validate = (doc: doc): array<parseError> => {
     }
   })
 
+  errors
+}
+
+let validateChecked = (doc: doc): array<parseError> => {
+  let errors = validate(doc)
+  let allowed = Belt.Set.String.fromArray([|
+    "abstract",
+    "refs",
+    "fig",
+    "table",
+    "opaque",
+    "section",
+    "requires",
+  |])
+
+  let rec walk = (blocks: array<block>, depthLine: int) => {
+    blocks->Belt.Array.forEachWithIndex((i, block) => {
+      let lineNo = depthLine + i + 1
+      switch block {
+      | Directive(name, _attrs, body) =>
+          if !Belt.Set.String.has(allowed, name) {
+            errors->Belt.Array.push({line: lineNo, msg: "unknown directive: " ++ name})
+          }
+          walk(body, lineNo)
+      | _ => ()
+      }
+    })
+  }
+
+  walk(doc, 0)
   errors
 }
