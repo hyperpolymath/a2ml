@@ -196,7 +196,11 @@ demo:
 # Run vector checks (prototype runner)
 vectors:
     @echo "Running vector checks..."
-    @if command -v rescript >/dev/null 2>&1; then \
+    @if [ -x /home/hyper/.deno/bin/deno ]; then \
+        /home/hyper/.deno/bin/deno run -A npm:rescript@latest build prototype/rescript; \
+      elif command -v deno >/dev/null 2>&1; then \
+        deno run -A npm:rescript@latest build prototype/rescript; \
+      elif command -v rescript >/dev/null 2>&1; then \
         rescript build prototype/rescript; \
       else \
         echo "rescript not found; install the ReScript compiler." >&2; \
@@ -217,7 +221,11 @@ vectors:
 vectors-report:
     @echo "Running vector checks (report)..."
     @mkdir -p build
-    @if command -v rescript >/dev/null 2>&1; then \
+    @if [ -x /home/hyper/.deno/bin/deno ]; then \
+        /home/hyper/.deno/bin/deno run -A npm:rescript@latest build prototype/rescript; \
+      elif command -v deno >/dev/null 2>&1; then \
+        deno run -A npm:rescript@latest build prototype/rescript; \
+      elif command -v rescript >/dev/null 2>&1; then \
         rescript build prototype/rescript; \
       else \
         echo "rescript not found; install the ReScript compiler." >&2; \
@@ -236,7 +244,11 @@ vectors-report:
 
 # Dump A2ML surface AST as JSON
 dump-ast path:
-    @if command -v rescript >/dev/null 2>&1; then \
+    @if [ -x /home/hyper/.deno/bin/deno ]; then \
+        /home/hyper/.deno/bin/deno run -A npm:rescript@latest build prototype/rescript; \
+      elif command -v deno >/dev/null 2>&1; then \
+        deno run -A npm:rescript@latest build prototype/rescript; \
+      elif command -v rescript >/dev/null 2>&1; then \
         rescript build prototype/rescript; \
       else \
         echo "rescript not found; install the ReScript compiler." >&2; \
@@ -281,7 +293,11 @@ package-cli:
 
 # Run CLI (prototype)
 cli *args:
-    @if command -v rescript >/dev/null 2>&1; then \
+    @if [ -x /home/hyper/.deno/bin/deno ]; then \
+        /home/hyper/.deno/bin/deno run -A npm:rescript@latest build prototype/rescript; \
+      elif command -v deno >/dev/null 2>&1; then \
+        deno run -A npm:rescript@latest build prototype/rescript; \
+      elif command -v rescript >/dev/null 2>&1; then \
         rescript build prototype/rescript; \
       else \
         echo "rescript not found; install the ReScript compiler." >&2; \
