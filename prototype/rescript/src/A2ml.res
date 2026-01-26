@@ -239,7 +239,7 @@ let rec renderBlocks = (blocks: array<block>): string => {
   ->Belt.Array.map(block =>
       switch block {
       | Heading(level, text) =>
-          "<h" ++ string_of_int(level) ++ ">" ++ text ++ "</h" ++ string_of_int(level) ++ ">"
+          "<h" ++ Int.toString(level) ++ ">" ++ text ++ "</h" ++ Int.toString(level) ++ ">"
       | Paragraph(parts) => "<p>" ++ renderInline(parts) ++ "</p>"
       | List(items) =>
           let lis =
@@ -264,7 +264,7 @@ let renderHtml = (doc: doc): string => {
 }
 
 let validate = (doc: doc): array<parseError> => {
-  let ids = Belt.Set.String.make()
+  let ids = ref(Belt.Set.String.empty)
   let refs = Belt.Array.make(0, ("", 0))
   let errors = Belt.Array.make(0, {line: 0, msg: ""})
 
@@ -275,10 +275,10 @@ let validate = (doc: doc): array<parseError> => {
       | Directive(_name, attrs, body) =>
           attrs->Belt.Array.forEach(((k, v)) => {
             if k == "id" {
-              if Belt.Set.String.has(ids, v) {
+              if Belt.Set.String.has(ids.contents, v) {
                 errors->Belt.Array.push({line: lineNo, msg: "duplicate id: " ++ v})
               } else {
-                Belt.Set.String.add(ids, v)->ignore
+                ids.contents = Belt.Set.String.add(ids.contents, v)
               }
             } else if k == "ref" {
               refs->Belt.Array.push((v, lineNo))
@@ -295,7 +295,7 @@ let validate = (doc: doc): array<parseError> => {
   walk(doc, 0)
 
   refs->Belt.Array.forEach(((refId, lineNo)) => {
-    if !Belt.Set.String.has(ids, refId) {
+    if !Belt.Set.String.has(ids.contents, refId) {
       errors->Belt.Array.push({line: lineNo, msg: "unresolved reference: " ++ refId})
     }
   })
