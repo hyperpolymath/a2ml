@@ -90,7 +90,7 @@ let parseAttrs = (line: string): attrs => {
 }
 
 let isDirectiveStart = (line: string): bool => {
-  String.startsWith(String.trim(line), "@") && String.contains(line, ":")
+  String.startsWith(String.trim(line), "@") && Js.String2.includes(line, ":")
 }
 
 let parseInline = (text: string): array<inline> => {
