@@ -28,6 +28,11 @@ translate (MkSDoc bs) = MkDoc (map toBlock bs)
     attrLookup _ [] = Nothing
     attrLookup k ((k2, v) :: rest) = if k == k2 then Just v else attrLookup k rest
 
+    collectParagraphs : List SBlock -> List String
+    collectParagraphs [] = []
+    collectParagraphs (SParagraph xs :: rest) = inlineToText xs :: collectParagraphs rest
+    collectParagraphs (_ :: rest) = collectParagraphs rest
+
     toBlock : SBlock -> Block
     toBlock (SHeading _ t) = Section (MkSec (MkId ("sec:" ++ t)) t [])
     toBlock (SParagraph t) = Para (inlineToText t)
@@ -37,19 +42,21 @@ translate (MkSDoc bs) = MkDoc (map toBlock bs)
         "fig" =>
           let mid = attrLookup "id" attrs
               mref = attrLookup "ref" attrs
-              caption = inlineToText (concatMap inlineFromBlock body)
+              caption = case collectParagraphs body of
+                [] => ""
+                (c :: _) => c
           in Figure (MkFig (mkId (maybe "fig:unnamed" id mid)) caption (map mkId mref))
         "table" =>
           let mid = attrLookup "id" attrs
-              caption = inlineToText (concatMap inlineFromBlock body)
+              caption = case collectParagraphs body of
+                [] => ""
+                (c :: _) => c
           in Table (MkTbl (mkId (maybe "tbl:unnamed" id mid)) caption)
         "refs" =>
-          Refs []
+          let labels = collectParagraphs body
+              refs = map MkRef labels
+          in Refs refs
         "abstract" =>
           Section (MkSec (mkId "sec:abstract") "Abstract" (map toBlock body))
         _ =>
           Section (MkSec (mkId ("sec:" ++ name)) name (map toBlock body))
-
-    inlineFromBlock : SBlock -> List Inline
-    inlineFromBlock (SParagraph xs) = xs
-    inlineFromBlock _ = []

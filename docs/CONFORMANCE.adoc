@@ -16,6 +16,7 @@ This document defines conformance requirements and test vectors for A2ML v0.
 * Deterministic parsing for identical input bytes.
 * Exact preservation of opaque payloads.
 * Reference resolution in checked/attested modes.
+* Inline parsing rules for emphasis/strong/links.
 
 == Test Vectors
 

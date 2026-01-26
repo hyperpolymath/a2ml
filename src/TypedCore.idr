@@ -71,7 +71,7 @@ collectIds (MkDoc blocks) = concatMap collectBlock blocks
     collectBlock (Section s) = s.id :: collectIds (MkDoc s.body)
     collectBlock (Figure f) = [f.id]
     collectBlock (Table t) = [t.id]
-    collectBlock (Opaque p) = maybe [] (id => [rid]) p.id
+    collectBlock (Opaque p) = maybe [] (\rid => [rid]) p.id
     collectBlock _ = []
 
 collectRefs : Doc -> List Id
@@ -79,7 +79,7 @@ collectRefs (MkDoc blocks) = concatMap collectBlock blocks
   where
     collectBlock : Block -> List Id
     collectBlock (Section s) = collectRefs (MkDoc s.body)
-    collectBlock (Figure f) = maybe [] (id => [rid]) f.ref
+    collectBlock (Figure f) = maybe [] (\rid => [rid]) f.ref
     collectBlock _ = []
 
 idEq : Id -> Id -> Bool

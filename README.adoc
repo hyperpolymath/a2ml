@@ -61,6 +61,7 @@ A2ML is a typed, attested markup format. It verifies structure and references.
 * link:src/Surface.idr[Surface AST]
 * link:docs/AST-JSON.adoc[Surface AST JSON (prototype)]
 * link:docs/DIRECTIVE-MAPPING.adoc[Directive Mapping (prototype)]
+* link:docs/INLINE-RULES.adoc[Inline Rules (prototype)]
 
 == Vectors
 
@@ -73,6 +74,7 @@ A2ML is a typed, attested markup format. It verifies structure and references.
 == Release Notes
 
 * link:RELEASE-NOTES-v0.1.0.adoc[v0.1.0 Release Notes]
+* link:RELEASE-NOTES-v0.5.0.adoc[v0.5.0 Release Notes]
 
 == Announcement
 

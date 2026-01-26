@@ -95,6 +95,16 @@ NL           ::= "\n"
 * `@requires` (structural dependencies)
 * `@opaque` (byte-for-byte payload preservation)
 
+== Inline Parsing (Prototype)
+
+The v0 prototype supports inline emphasis, strong, and links:
+
+* `*text*` -> emphasis
+* `**text**` -> strong
+* `[label](url)` -> link
+
+See link:docs/INLINE-RULES.adoc[INLINE-RULES] for the prototype rules.
+
 == Semantics (Surface -> Typed Core)
 
 1) Headings become `Section` nodes.

@@ -9,7 +9,9 @@ import A2ML.Translator
 mkSampleDoc : Doc
 mkSampleDoc = MkDoc [
   Section (MkSec (MkId "sec:abstract") "Abstract" [Para "Hello"]),
-  Figure (MkFig (MkId "fig:one") "Fig" (Just (MkId "sec:abstract")))
+  Figure (MkFig (MkId "fig:one") "Fig" (Just (MkId "sec:abstract"))),
+  Table (MkTbl (MkId "tbl:one") "Table caption"),
+  Refs [MkRef "[1] Ref"]
   ]
 
 mkSurface : SDoc
@@ -17,7 +19,9 @@ mkSurface = MkSDoc [
   SHeading 1 "Intro",
   SParagraph [SText "Hello"],
   SList [[SText "Item"]],
-  SDirective "fig" [("id", "fig:one"), ("ref", "sec:intro")] [SParagraph [SText "Caption"]]
+  SDirective "fig" [("id", "fig:one"), ("ref", "sec:intro")] [SParagraph [SText "Caption"]],
+  SDirective "table" [("id", "tbl:one")] [SParagraph [SText "Table caption"]],
+  SDirective "refs" [] [SParagraph [SText "[1] Ref"]]
   ]
 
 main : IO ()
