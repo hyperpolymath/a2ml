@@ -51,6 +51,7 @@ A2ML is a typed, attested markup format. It verifies structure and references.
 == Prototype
 
 * link:prototype/rescript/README.adoc[ReScript Web Prototype]
+* link:prototype/wasm/README.adoc[ReScript + WASM Prototype]
 
 == Status
 

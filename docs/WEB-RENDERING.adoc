@@ -37,6 +37,10 @@ let renderHtml: Ast.doc => string
 
 See `prototype/rescript/` for a minimal Module 0 parser + HTML renderer sketch.
 
+== Prototype (ReScript + WASM)
+
+See `prototype/wasm/` for a direct-to-WASM sketch using `rescript-wasm-runtime`.
+
 == Browser Usage (Plain JS)
 
 [source,html]
