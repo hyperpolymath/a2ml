@@ -30,6 +30,11 @@ v1 report: `docs/CONFORMANCE-REPORT-v1.adoc`.
 
 == Vector List (v0)
 
+* `directive-attrs.a2ml` -> `directive-attrs.expected`
 * `module0-basic.a2ml` -> `module0-basic.expected`
+* `inline-edges.a2ml` -> `inline-edges.expected`
+* `inline-formatting.a2ml` -> `inline-formatting.expected`
 * `opaque-roundtrip.a2ml` -> `opaque-roundtrip.expected`
+* `refs-basic.a2ml` -> `refs-basic.expected`
 * `refs-missing.a2ml` -> `refs-missing.expected`
+* `table-basic.a2ml` -> `table-basic.expected`

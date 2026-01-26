@@ -27,7 +27,7 @@ pipelines.
 * Line: a sequence of characters ending in LF or EOF
 * Blank line: line containing only whitespace
 * Identifier: `ID = [A-Za-z][A-Za-z0-9:_-]*`
-* String: `"..."` with `\\` and `\"` escapes
+* String: `"..."` or `'...'` with `\\` and escaped quote support
 
 == Surface Grammar (EBNF)
 
@@ -104,6 +104,16 @@ The v0 prototype supports inline emphasis, strong, and links:
 * `[label](url)` -> link
 
 See link:docs/INLINE-RULES.adoc[INLINE-RULES] for the prototype rules.
+
+== Prototype Coverage Notes (Module 0)
+
+The Module 0 prototype in `prototype/rescript/` is intentionally small:
+
+* Directive headers MUST be on a single line and end with `:`.
+* `@refs` content is parsed as one paragraph per non-blank line.
+* `@opaque` content is treated as raw lines until `@end` and preserved verbatim.
+* Heading bodies are not nested; headings are standalone blocks.
+* Code fences are not implemented in the prototype.
 
 == Semantics (Surface -> Typed Core)
 

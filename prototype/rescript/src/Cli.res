@@ -33,7 +33,7 @@ let exit = (code: int): unit => {
 let helpText = "A2ML CLI (prototype)\n\n" ++
   "Usage:\n  a2ml <render|validate|ast> <file...|-> [options]\n\n" ++
   "Commands:\n  render    Render HTML to stdout (or --out)\n" ++
-  "  validate  Validate in checked mode, exit nonzero on errors\n" ++
+  "  validate  Validate in checked mode, exit 2 on errors\n" ++
   "  ast       Output JSON surface AST\n\n" ++
   "Options:\n  --mode <lax|checked>   Parse mode (default: lax)\n" ++
   "  --out <path>           Write output to file\n" ++

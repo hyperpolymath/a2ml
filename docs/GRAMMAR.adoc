@@ -12,7 +12,7 @@ formalization to aid implementers.
 * `NL` = linefeed (\n)
 * `SP` = one or more spaces
 * `ID` = `[A-Za-z][A-Za-z0-9:_-]*`
-* `STRING` = `"..."` with `\\` and `\"` escapes
+* `STRING` = `"..."` or `'...'` with `\\` and escaped quote support
 
 == Grammar (EBNF)
 
@@ -79,3 +79,12 @@ URL            ::= [^ )\n]+
 
 * Lax mode may infer abstract/refs from headings or labels.
 * Attested mode forbids inference and requires explicit IDs.
+
+== Prototype Deviations (Module 0)
+
+The prototype parser in `prototype/rescript/` intentionally supports a subset:
+
+* Directive headers must end with `:` on a single line.
+* `@refs` content is parsed as one paragraph per non-blank line.
+* `@opaque` content is treated as raw lines until `@end`.
+* Code fences are not implemented.
