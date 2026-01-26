@@ -24,6 +24,7 @@ Each vector includes a `.a2ml` input and a human-readable `.expected` file
 that describes the required parse outcome.
 
 Reference prototype: `prototype/rescript/` (parser + basic validator sketch).
+Directive mapping: `docs/DIRECTIVE-MAPPING.adoc` (prototype).
 
 == Vector List (v0)
 
