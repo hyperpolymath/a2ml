@@ -5,10 +5,16 @@
 
 type attrs = array<(string, string)>
 
+type inline =
+  | Text(string)
+  | Emph(string)
+  | Strong(string)
+  | Link(string, string)
+
 type block =
   | Heading(int, string)
-  | Paragraph(string)
-  | List(array<string>)
+  | Paragraph(array<inline>)
+  | List(array<array<inline>>)
   | Directive(string, attrs, array<block>)
 
 type doc = array<block>
@@ -20,16 +26,6 @@ type parseMode =
 type parseError = {
   line: int,
   msg: string,
-}
-
-let renderInline = (text: string): string => {
-  let strongRe = %re("/\\*\\*([^*]+)\\*\\*/g")
-  let emphRe = %re("/\\*([^*]+)\\*/g")
-  let linkRe = %re("/\\[([^\\]]+)\\]\\(([^)]+)\\)/g")
-  text
-  ->Js.String.replaceByRe(strongRe, "<strong>$1</strong>")
-  ->Js.String.replaceByRe(emphRe, "<em>$1</em>")
-  ->Js.String.replaceByRe(linkRe, "<a href=\"$2\">$1</a>")
 }
 
 let isHeading = (line: string): option<(int, string)> => {
@@ -80,8 +76,63 @@ let isDirectiveStart = (line: string): bool => {
   String.startsWith(String.trim(line), "@") && String.contains(line, ":")
 }
 
+let parseInline = (text: string): array<inline> => {
+  // Simple, non-nested parser for strong/emph/link in one pass.
+  let rec loop = (i, acc) =>
+    if i >= String.length(text) {
+      Belt.Array.reverse(acc)
+    } else if i + 1 < String.length(text) && String.sub(text, i, 2) == "**" {
+      let close = String.indexFrom(text, i + 2, "**")
+      switch close {
+      | None => loop(i + 2, Belt.Array.concat([|Text("**")|], acc))
+      | Some(j) =>
+        let content = String.slice(text, i + 2, j)
+        loop(j + 2, Belt.Array.concat([|Strong(content)|], acc))
+      }
+    } else if String.get(text, i) == '*' {
+      let close = String.indexFrom(text, i + 1, "*")
+      switch close {
+      | None => loop(i + 1, Belt.Array.concat([|Text("*")|], acc))
+      | Some(j) =>
+        let content = String.slice(text, i + 1, j)
+        loop(j + 1, Belt.Array.concat([|Emph(content)|], acc))
+      }
+    } else if String.get(text, i) == '[' {
+      let closeText = String.indexFrom(text, i + 1, "]")
+      switch closeText {
+      | None => loop(i + 1, Belt.Array.concat([|Text("[")|], acc))
+      | Some(j) =>
+        if j + 1 < String.length(text) && String.get(text, j + 1) == '(' {
+          let closeUrl = String.indexFrom(text, j + 2, ")")
+          switch closeUrl {
+          | None => loop(i + 1, Belt.Array.concat([|Text("[")|], acc))
+          | Some(k) =>
+            let label = String.slice(text, i + 1, j)
+            let url = String.slice(text, j + 2, k)
+            loop(k + 1, Belt.Array.concat([|Link(label, url)|], acc))
+          }
+        } else {
+          loop(i + 1, Belt.Array.concat([|Text("[")|], acc))
+        }
+      }
+    } else {
+      let nextSpecial = ["*", "["]
+        ->Belt.Array.keepMap(ch => {
+            switch String.indexFrom(text, i, ch) {
+            | None => None
+            | Some(j) => Some(j)
+            }
+          })
+      let next = if Belt.Array.length(nextSpecial) == 0 {String.length(text)}
+        else Belt.Array.reduce(nextSpecial, String.length(text), (a, b) => if b < a {b} else {a})
+      let chunk = String.slice(text, i, next)
+      loop(next, Belt.Array.concat([|Text(chunk)|], acc))
+    }
+  loop(0, [||])
+}
+
 let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): (array<block>, int) => {
-  let blocks = Belt.Array.make(0, Paragraph(""))
+  let blocks = Belt.Array.make(0, Paragraph([||]))
 
   let rec loop = i => {
     if i >= Belt.Array.length(lines) {
@@ -116,7 +167,7 @@ let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): 
                 let l = String.trim(Belt.Array.getExn(lines, j))
                 if String.startsWith(l, "-") {
                   let item = String.trim(String.sliceToEnd(l, 1))
-                  collect(j + 1, Belt.Array.concat(acc, [|item|]))
+                  collect(j + 1, Belt.Array.concat(acc, [|parseInline(item)|]))
                 } else {
                   (j, acc)
                 }
@@ -137,7 +188,7 @@ let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): 
               }
             let (nextIndex, parts) = collect(i, [||])
             let text = parts->Belt.Array.joinWith(" ")
-            blocks->Belt.Array.push(Paragraph(text))
+            blocks->Belt.Array.push(Paragraph(parseInline(text)))
             loop(nextIndex)
           }
         }
@@ -154,13 +205,26 @@ let parse = (~mode: parseMode=Lax, input: string): doc => {
   blocks
 }
 
+let renderInline = (parts: array<inline>): string => {
+  parts
+  ->Belt.Array.map(part =>
+      switch part {
+      | Text(t) => t
+      | Emph(t) => "<em>" ++ t ++ "</em>"
+      | Strong(t) => "<strong>" ++ t ++ "</strong>"
+      | Link(label, url) => "<a href=\"" ++ url ++ "\">" ++ label ++ "</a>"
+      }
+    )
+  ->Belt.Array.joinWith("")
+}
+
 let rec renderBlocks = (blocks: array<block>): string => {
   blocks
   ->Belt.Array.map(block =>
       switch block {
       | Heading(level, text) =>
           "<h" ++ string_of_int(level) ++ ">" ++ text ++ "</h" ++ string_of_int(level) ++ ">"
-      | Paragraph(text) => "<p>" ++ renderInline(text) ++ "</p>"
+      | Paragraph(parts) => "<p>" ++ renderInline(parts) ++ "</p>"
       | List(items) =>
           let lis = items->Belt.Array.map(item => "<li>" ++ renderInline(item) ++ "</li>")->Belt.Array.joinWith("")
           "<ul>" ++ lis ++ "</ul>"

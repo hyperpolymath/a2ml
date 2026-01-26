@@ -58,6 +58,7 @@ A2ML is a typed, attested markup format. It verifies structure and references.
 
 * link:src/TypedCore.idr[Typed core stub]
 * link:src/Translator.idr[Translation stub]
+* link:src/Surface.idr[Surface AST]
 
 == Vectors
 
