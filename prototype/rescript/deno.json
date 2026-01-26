@@ -1,4 +1,7 @@
 {
+  "imports": {
+    "@rescript/runtime/": "npm:@rescript/runtime/"
+  },
   "permissions": {
     "read": true
   }
