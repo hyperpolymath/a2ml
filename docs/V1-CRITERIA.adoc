@@ -9,7 +9,7 @@ This checklist defines what “v1.0.0” means for A2ML.
 * HTML renderer outputs deterministic structure
 * CLI provides render/validate/ast commands
 * Idris2 typed core implemented (Doc/Block types)
-* Proof obligations for core invariants (unique IDs, resolved refs, required sections)
+* Proof obligations for core invariants (unique IDs, resolved refs, required sections) with decidable checks
 * Opaque payload round-trip fidelity tests pass
 * Conformance suite published and reproducible
 * Spec frozen with versioned grammar appendix

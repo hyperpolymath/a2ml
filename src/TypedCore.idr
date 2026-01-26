@@ -2,8 +2,6 @@ module A2ML.TypedCore
 
 %default total
 
--- Minimal typed core stub for v0.2 development.
-
 public export
 record Id where
   constructor MkId
@@ -116,15 +114,15 @@ validateDoc doc =
       errs2 = if refsResolveB doc then [] else ["unresolved references"]
   in errs1 ++ errs2
 
--- Placeholder proof types (v0.3+)
+-- Proof predicates (v1)
 public export
 UniqueIds : Doc -> Type
-UniqueIds _ = Unit
+UniqueIds doc = uniqueIdsB doc = True
 
 public export
 RefsResolve : Doc -> Type
-RefsResolve _ = Unit
+RefsResolve doc = refsResolveB doc = True
 
 public export
 HasAbstract : Doc -> Type
-HasAbstract _ = Unit
+HasAbstract doc = hasAbstractB doc = True

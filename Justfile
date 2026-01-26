@@ -269,6 +269,10 @@ ada-tui:
         exit 1; \
       fi
 
+# Package CLI artifact
+package-cli:
+    @./scripts/package-cli.sh
+
 # Run CLI (prototype)
 cli *args:
     @if command -v rescript >/dev/null 2>&1; then \

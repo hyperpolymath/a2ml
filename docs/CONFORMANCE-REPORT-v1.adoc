@@ -1,0 +1,11 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= A2ML v1 Conformance Report (Draft)
+
+== Status
+
+* Pending full run
+* Target: v1 release
+
+== Artifacts
+
+* `build/vector-report.json` (from `just vectors-report`)

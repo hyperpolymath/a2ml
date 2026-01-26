@@ -76,6 +76,7 @@ A2ML is a typed, attested markup format. It verifies structure and references.
 * link:docs/CLI.adoc[CLI (prototype)]
 * link:docs/a2ml.1[Man page]
 * link:docs/PACKAGING.adoc[Packaging notes]
+* `just package-cli`
 
 == Ada/SPARK TUI
 

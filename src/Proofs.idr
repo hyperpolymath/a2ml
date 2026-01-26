@@ -4,13 +4,13 @@ import A2ML.TypedCore
 
 %default total
 
--- Placeholder proof stubs for v1
+-- Decidable proofs for v1 predicates
 
-uniqueIdsProof : (doc : Doc) -> UniqueIds doc
-uniqueIdsProof _ = ()
+uniqueIdsDec : (doc : Doc) -> Dec (UniqueIds doc)
+uniqueIdsDec doc = decEq (uniqueIdsB doc) True
 
-refsResolveProof : (doc : Doc) -> RefsResolve doc
-refsResolveProof _ = ()
+refsResolveDec : (doc : Doc) -> Dec (RefsResolve doc)
+refsResolveDec doc = decEq (refsResolveB doc) True
 
-hasAbstractProof : (doc : Doc) -> HasAbstract doc
-hasAbstractProof _ = ()
+hasAbstractDec : (doc : Doc) -> Dec (HasAbstract doc)
+hasAbstractDec doc = decEq (hasAbstractB doc) True

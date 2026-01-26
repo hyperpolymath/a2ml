@@ -26,6 +26,7 @@ that describes the required parse outcome.
 
 Reference prototype: `prototype/rescript/` (parser + basic validator sketch).
 Directive mapping: `docs/DIRECTIVE-MAPPING.adoc` (prototype).
+v1 report: `docs/CONFORMANCE-REPORT-v1.adoc`.
 
 == Vector List (v0)
 
