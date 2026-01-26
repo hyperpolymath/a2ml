@@ -36,11 +36,15 @@ let renderHtml: Ast.doc => string
 == Prototype (ReScript)
 
 See `prototype/rescript/` for a minimal Module 0 parser + HTML renderer sketch.
-See `docs/demo.html` for a static preview of input/output.
+See `docs/demo.html` for a preview generated via ddraig-ssg.
 
 == Prototype (ReScript + WASM)
 
 See `prototype/wasm/` for a direct-to-WASM sketch using `rescript-wasm-runtime`.
+
+== Demo Generation (ddraig-ssg)
+
+The demo page is generated from `prototype/ddraig/content/demo.md` using\n+`scripts/build-demo-ddraig.sh`, which compiles and runs a small Idris driver\n+against the `ddraig-ssg` repo.
 
 == Browser Usage (Plain JS)
 
