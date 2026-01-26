@@ -61,7 +61,7 @@ let isHeading = (line: string): option<(int, string)> => {
 }
 
 let parseAttrs = (line: string): attrs => {
-  // Parse "@name(a=b,c=d):" into [("a","b"),("c","d")]
+  // Parse "name(a=b,c=d)" into [("a","b"),("c","d")]
   let start = switch indexOfOpt(line, "(") {
   | None => -1
   | Some(idx) => idx
@@ -81,7 +81,14 @@ let parseAttrs = (line: string): attrs => {
         if Belt.Array.length(kv) == 2 {
           let key = kv->Belt.Array.getExn(0)->String.trim
           let value = kv->Belt.Array.getExn(1)->String.trim
-          Some((key, value))
+          let unquoted =
+            if (String.startsWith(value, "\"") && String.endsWith(value, "\"")) ||
+                (String.startsWith(value, "'") && String.endsWith(value, "'")) {
+              String.slice(value, ~start=1, ~end=String.length(value) - 1)
+            } else {
+              value
+            }
+          Some((key, unquoted))
         } else {
           None
         }
@@ -90,7 +97,8 @@ let parseAttrs = (line: string): attrs => {
 }
 
 let isDirectiveStart = (line: string): bool => {
-  String.startsWith(String.trim(line), "@") && String.includes(line, ":")
+  let trimmed = String.trim(line)
+  String.startsWith(trimmed, "@") && String.endsWith(trimmed, ":")
 }
 
 let parseInline = (text: string): array<inline> => {
@@ -147,6 +155,46 @@ let parseInline = (text: string): array<inline> => {
   loop(0, [])
 }
 
+let parseDirectiveHeader = (line: string): (string, string) => {
+  let trimmed = String.trim(line)
+  let withoutAt = String.slice(trimmed, ~start=1)
+  let body =
+    if String.endsWith(withoutAt, ":") {
+      String.slice(withoutAt, ~start=0, ~end=String.length(withoutAt) - 1)
+    } else {
+      withoutAt
+    }
+  let nameOnly = switch indexOfOpt(body, "(") {
+    | None => body
+    | Some(idx) => String.slice(body, ~start=0, ~end=idx)
+  }
+  (nameOnly, body)
+}
+
+let parseDirectiveLines = (
+  lines: array<string>,
+  startIndex: int,
+  parseLine: string => option<block>,
+): (array<block>, int) => {
+  let blocks = Belt.Array.make(0, Paragraph([]))
+  let rec loop = i =>
+    if i >= Belt.Array.length(lines) {
+      (blocks, i)
+    } else {
+      let line = Belt.Array.getExn(lines, i)
+      if String.trim(line) == "@end" {
+        (blocks, i + 1)
+      } else {
+        switch parseLine(line) {
+        | Some(block) => blocks->Belt.Array.push(block)
+        | None => ()
+        }
+        loop(i + 1)
+      }
+    }
+  loop(startIndex)
+}
+
 let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): (array<block>, int) => {
   let blocks = Belt.Array.make(0, Paragraph([]))
 
@@ -167,16 +215,45 @@ let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): 
           }
         | None =>
           if isDirectiveStart(line) {
-            let header = String.trim(line)
-            let name = String.slice(header, ~start=1)
-            let nameOnly = switch indexOfOpt(name, ":") {
-              | None => name
-              | Some(idx) => String.slice(name, ~start=0, ~end=idx)
+            let (nameOnly, body) = parseDirectiveHeader(line)
+            let attrs = parseAttrs(body)
+            if nameOnly == "opaque" {
+              let rec collectRaw = (j, acc) =>
+                if j >= Belt.Array.length(lines) {
+                  (j, acc)
+                } else {
+                  let rawLine = Belt.Array.getExn(lines, j)
+                  if String.trim(rawLine) == "@end" {
+                    (j + 1, acc)
+                  } else {
+                    collectRaw(j + 1, Belt.Array.concat(acc, [rawLine]))
+                  }
+                }
+              let (nextIndex, rawLines) = collectRaw(i + 1, [])
+              let rawText = rawLines->Belt.Array.joinWith("\n", s => s)
+              blocks->Belt.Array.push(Directive(nameOnly, attrs, [Paragraph([Text(rawText)])]))
+              loop(nextIndex)
+            } else if nameOnly == "refs" {
+              let (refBlocks, nextIndex) =
+                parseDirectiveLines(
+                  lines,
+                  i + 1,
+                  refLine => {
+                    let trimmed = String.trim(refLine)
+                    if trimmed == "" {
+                      None
+                    } else {
+                      Some(Paragraph(parseInline(trimmed)))
+                    }
+                  },
+                )
+              blocks->Belt.Array.push(Directive(nameOnly, attrs, refBlocks))
+              loop(nextIndex)
+            } else {
+              let (innerBlocks, nextIndex) = parseBlocks(lines, i + 1, true)
+              blocks->Belt.Array.push(Directive(nameOnly, attrs, innerBlocks))
+              loop(nextIndex)
             }
-            let attrs = parseAttrs(header)
-            let (innerBlocks, nextIndex) = parseBlocks(lines, i + 1, true)
-            blocks->Belt.Array.push(Directive(nameOnly, attrs, innerBlocks))
-            loop(nextIndex)
           } else if String.startsWith(String.trim(line), "-") {
             let rec collect = (j, acc) =>
               if j >= Belt.Array.length(lines) { (j, acc) } else {
@@ -196,7 +273,11 @@ let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): 
             let rec collect = (j, acc) =>
               if j >= Belt.Array.length(lines) { (j, acc) } else {
                 let l = Belt.Array.getExn(lines, j)
-                if String.trim(l) == "" || isDirectiveStart(l) || String.startsWith(String.trim(l), "-") || isHeading(l) != None {
+                if String.trim(l) == "" ||
+                   (stopAtEnd && String.trim(l) == "@end") ||
+                   isDirectiveStart(l) ||
+                   String.startsWith(String.trim(l), "-") ||
+                   isHeading(l) != None {
                   (j, acc)
                 } else {
                   collect(j + 1, Belt.Array.concat(acc, [String.trim(l)]))
@@ -297,7 +378,7 @@ let validate = (doc: doc): array<parseError> => {
 
   refs->Belt.Array.forEach(((refId, lineNo)) => {
     if !Belt.Set.String.has(ids.contents, refId) {
-      errors->Belt.Array.push({line: lineNo, msg: "unresolved reference: " ++ refId})
+      errors->Belt.Array.push({line: lineNo, msg: "unresolved reference \"" ++ refId ++ "\""})
     }
   })
 

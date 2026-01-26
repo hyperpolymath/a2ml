@@ -77,3 +77,7 @@ htmlcov/
 /tmp/
 *.tmp
 *.bak
+prototype/rescript/lib/
+prototype/rescript/node_modules/
+prototype/rescript/src/*.bs.js
+prototype/rescript/package-lock.json

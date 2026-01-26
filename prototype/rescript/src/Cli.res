@@ -5,12 +5,15 @@ let hasDeno = %raw(`typeof Deno !== "undefined"`)
 @val external argv: array<string> = "process.argv"
 
 let readText = (path: string): string => {
+  let _ = path
   %raw(`(typeof Deno !== "undefined")
     ? Deno.readTextFileSync(path)
     : require("fs").readFileSync(path, "utf8")`)
 }
 
 let writeText = (path: string, text: string): unit => {
+  let _ = path
+  let _ = text
   %raw(`(typeof Deno !== "undefined")
     ? Deno.writeTextFileSync(path, text)
     : require("fs").writeFileSync(path, text, "utf8")`)
@@ -23,6 +26,7 @@ let readStdin = (): string => {
 }
 
 let exit = (code: int): unit => {
+  let _ = code
   %raw(`(typeof Deno !== "undefined") ? Deno.exit(code) : process.exit(code)`)
 }
 

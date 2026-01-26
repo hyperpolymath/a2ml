@@ -3,6 +3,6 @@
 let _ = {
   let code = VectorRunner.run()
   if code != 0 {
-    Js.Exn.raiseError("Vector tests failed")
+    JsError.throwWithMessage("Vector tests failed")
   }
 }

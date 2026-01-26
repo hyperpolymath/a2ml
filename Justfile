@@ -248,9 +248,9 @@ vectors-report:
         fi; \
       fi
     @if [ -x /home/hyper/.deno/bin/deno ]; then \
-        /home/hyper/.deno/bin/deno run --allow-read --config prototype/rescript/deno.json prototype/rescript/src/RunReport.bs.js; \
+        /home/hyper/.deno/bin/deno run --allow-read --allow-write --config prototype/rescript/deno.json prototype/rescript/src/RunReport.bs.js; \
       elif command -v deno >/dev/null 2>&1; then \
-        deno run --allow-read --config prototype/rescript/deno.json prototype/rescript/src/RunReport.bs.js; \
+        deno run --allow-read --allow-write --config prototype/rescript/deno.json prototype/rescript/src/RunReport.bs.js; \
       elif command -v node >/dev/null 2>&1; then \
         node prototype/rescript/src/RunReport.bs.js; \
       else \

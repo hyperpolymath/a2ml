@@ -1,51 +1,54 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
 
-let inlineToJson = (part: A2ml.inline): Js.Json.t => {
+let inlineToJson = (part: A2ml.inline): JSON.t => {
   switch part {
-  | Text(t) => Js.Json.object_(Js.Dict.fromArray([("type", Js.Json.string("text")), ("text", Js.Json.string(t))]))
-  | Emph(t) => Js.Json.object_(Js.Dict.fromArray([("type", Js.Json.string("emph")), ("text", Js.Json.string(t))]))
-  | Strong(t) => Js.Json.object_(Js.Dict.fromArray([("type", Js.Json.string("strong")), ("text", Js.Json.string(t))]))
+  | Text(t) =>
+      JSON.Encode.object(Dict.fromArray([("type", JSON.Encode.string("text")), ("text", JSON.Encode.string(t))]))
+  | Emph(t) =>
+      JSON.Encode.object(Dict.fromArray([("type", JSON.Encode.string("emph")), ("text", JSON.Encode.string(t))]))
+  | Strong(t) =>
+      JSON.Encode.object(Dict.fromArray([("type", JSON.Encode.string("strong")), ("text", JSON.Encode.string(t))]))
   | Link(label, url) =>
-      Js.Json.object_(Js.Dict.fromArray([
-        ("type", Js.Json.string("link")),
-        ("label", Js.Json.string(label)),
-        ("url", Js.Json.string(url)),
+      JSON.Encode.object(Dict.fromArray([
+        ("type", JSON.Encode.string("link")),
+        ("label", JSON.Encode.string(label)),
+        ("url", JSON.Encode.string(url)),
       ]))
   }
 }
 
-let rec blockToJson = (block: A2ml.block): Js.Json.t => {
+let rec blockToJson = (block: A2ml.block): JSON.t => {
   switch block {
   | Heading(level, text) =>
-      Js.Json.object_(Js.Dict.fromArray([
-        ("type", Js.Json.string("heading")),
-        ("level", Js.Json.number(float_of_int(level))),
-        ("text", Js.Json.string(text)),
+      JSON.Encode.object(Dict.fromArray([
+        ("type", JSON.Encode.string("heading")),
+        ("level", JSON.Encode.float(Int.toFloat(level))),
+        ("text", JSON.Encode.string(text)),
       ]))
   | Paragraph(parts) =>
-      Js.Json.object_(Js.Dict.fromArray([
-        ("type", Js.Json.string("paragraph")),
-        ("inline", Js.Json.array(parts->Belt.Array.map(inlineToJson))),
+      JSON.Encode.object(Dict.fromArray([
+        ("type", JSON.Encode.string("paragraph")),
+        ("inline", JSON.Encode.array(parts->Belt.Array.map(inlineToJson))),
       ]))
   | List(items) =>
-      let rows = items->Belt.Array.map(parts => Js.Json.array(parts->Belt.Array.map(inlineToJson)))
-      Js.Json.object_(Js.Dict.fromArray([
-        ("type", Js.Json.string("list")),
-        ("items", Js.Json.array(rows)),
+      let rows = items->Belt.Array.map(parts => JSON.Encode.array(parts->Belt.Array.map(inlineToJson)))
+      JSON.Encode.object(Dict.fromArray([
+        ("type", JSON.Encode.string("list")),
+        ("items", JSON.Encode.array(rows)),
       ]))
   | Directive(name, attrs, body) =>
       let attrsJson = attrs->Belt.Array.map(((k, v)) =>
-        Js.Json.object_(Js.Dict.fromArray([("key", Js.Json.string(k)), ("value", Js.Json.string(v))]))
+        JSON.Encode.object(Dict.fromArray([("key", JSON.Encode.string(k)), ("value", JSON.Encode.string(v))]))
       )
-      Js.Json.object_(Js.Dict.fromArray([
-        ("type", Js.Json.string("directive")),
-        ("name", Js.Json.string(name)),
-        ("attrs", Js.Json.array(attrsJson)),
-        ("body", Js.Json.array(body->Belt.Array.map(blockToJson))),
+      JSON.Encode.object(Dict.fromArray([
+        ("type", JSON.Encode.string("directive")),
+        ("name", JSON.Encode.string(name)),
+        ("attrs", JSON.Encode.array(attrsJson)),
+        ("body", JSON.Encode.array(body->Belt.Array.map(blockToJson))),
       ]))
   }
 }
 
-let docToJson = (doc: A2ml.doc): Js.Json.t => {
-  Js.Json.array(doc->Belt.Array.map(blockToJson))
+let docToJson = (doc: A2ml.doc): JSON.t => {
+  JSON.Encode.array(doc->Belt.Array.map(blockToJson))
 }
