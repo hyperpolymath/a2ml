@@ -2,6 +2,8 @@
 
 let hasDeno = %raw(`typeof Deno !== "undefined"`)
 
+@val external argv: array<string> = "process.argv"
+
 let readText = (path: string): string => {
   %raw(`(typeof Deno !== "undefined")
     ? Deno.readTextFileSync(path)
@@ -69,7 +71,7 @@ let collectInputs = (args: array<string>): array<string> => {
       inputs
     } else {
       let arg = Belt.Array.getExn(args, i)
-  if String.startsWith(arg, "-") {
+      if String.startsWith(arg, "-") {
         inputs
       } else {
         inputs->Belt.Array.push(arg)
@@ -102,8 +104,8 @@ let astDoc = (input: string, mode: A2ml.parseMode): string => {
 }
 
 let _ = {
-  let args = Js.Sys.argv
-  if hasFlag(args, "-h") || hasFlag(args, "--help") { Js.log(helpText); exit(0) }
+  let args = argv
+  if hasFlag(args, "-h") || hasFlag(args, "--help") { Console.log(helpText); exit(0) }
   if Belt.Array.length(args) < 3 { usage() }
 
   let command = Belt.Array.getExn(args, 2)
@@ -124,27 +126,28 @@ let _ = {
   switch command {
   | "render" =>
       let outputs = sources->Belt.Array.map(src => renderDoc(readInput(src), mode))
-      let result = if concat { outputs->Belt.Array.joinWith("\n") } else { outputs->Belt.Array.joinWith("\n\n") }
+      let result =
+        if concat { outputs->Belt.Array.joinWith("\n", s => s) } else { outputs->Belt.Array.joinWith("\n\n", s => s) }
       switch outPath {
       | Some(p) => writeText(p, result)
-      | None => Js.log(result)
+      | None => Console.log(result)
       }
   | "validate" =>
       let allErrors = sources
         ->Belt.Array.map(src => validateDoc(readInput(src), mode))
         ->Belt.Array.reduce([], (acc, errs) => Belt.Array.concat(acc, errs))
       if Belt.Array.length(allErrors) == 0 {
-        Js.log("ok")
+        Console.log("ok")
       } else {
-        allErrors->Belt.Array.forEach(e => Js.Console.error(`${Int.toString(e.line)}: ${e.msg}`))
+        allErrors->Belt.Array.forEach(e => Console.error(`${Int.toString(e.line)}: ${e.msg}`))
         exit(2)
       }
   | "ast" =>
       let outputs = sources->Belt.Array.map(src => astDoc(readInput(src), mode))
-      let result = outputs->Belt.Array.joinWith("\n")
+      let result = outputs->Belt.Array.joinWith("\n", s => s)
       switch outPath {
       | Some(p) => writeText(p, result)
-      | None => Js.log(result)
+      | None => Console.log(result)
       }
   | _ => usage()
   }
