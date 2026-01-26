@@ -44,9 +44,14 @@ let usage = (): unit => {
 
 let getArg = (args: array<string>, name: string): option<string> => {
   let rec loop = i =>
-    if i >= Belt.Array.length(args) { None }
-    else if Belt.Array.getExn(args, i) == name {
-      if i + 1 < Belt.Array.length(args) { Some(Belt.Array.getExn(args, i + 1)) } else None
+    if i >= Belt.Array.length(args) {
+      None
+    } else if Belt.Array.getExn(args, i) == name {
+      if i + 1 < Belt.Array.length(args) {
+        Some(Belt.Array.getExn(args, i + 1))
+      } else {
+        None
+      }
     } else {
       loop(i + 1)
     }
