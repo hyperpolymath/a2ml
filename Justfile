@@ -321,20 +321,20 @@ cookbook:
 man:
     #!/usr/bin/env bash
     mkdir -p docs/man
-    cat > docs/man/{{project}}.1 << EOF
-.TH A2ML 1 "$(date +%Y-%m-%d)" "{{version}}" "A2ML Manual"
-.SH NAME
-{{project}} \- Attested Markup Language specification repository
-.SH SYNOPSIS
-.B just
-[recipe] [args...]
-.SH DESCRIPTION
-A2ML is a lightweight markup format that compiles into a typed, attested core.
-.br
-This repository contains the A2ML specification and related documentation.
-.SH AUTHOR
-Hyperpolymath <hyperpolymath@proton.me>
-EOF
+    printf '%s\n' \
+      ".TH A2ML 1 \"$(date +%Y-%m-%d)\" \"{{version}}\" \"A2ML Manual\"" \
+      ".SH NAME" \
+      "{{project}} \\- Attested Markup Language specification repository" \
+      ".SH SYNOPSIS" \
+      ".B just" \
+      "[recipe] [args...]" \
+      ".SH DESCRIPTION" \
+      "A2ML is a lightweight markup format that compiles into a typed, attested core." \
+      ".br" \
+      "This repository contains the A2ML specification and related documentation." \
+      ".SH AUTHOR" \
+      "Hyperpolymath <hyperpolymath@proton.me>" \
+      > docs/man/{{project}}.1
     echo "Generated: docs/man/{{project}}.1"
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -368,7 +368,7 @@ container-build tag="latest":
     fi
 
 # Run container
-container-run tag="latest" *args:
+container-run tag="latest" args="":
     #!/usr/bin/env bash
     CTR=$(just container-cmd)
     $CTR run --rm -it {{project}}:{{tag}} {{args}}
@@ -391,11 +391,11 @@ ci: deps quality
 # Install git hooks
 install-hooks:
     @mkdir -p .git/hooks
-    @cat > .git/hooks/pre-commit << 'EOF'
-#!/bin/bash
-just fmt-check || exit 1
-just lint || exit 1
-EOF
+    @printf '%s\n' \
+      '#!/bin/bash' \
+      'just fmt-check || exit 1' \
+      'just lint || exit 1' \
+      > .git/hooks/pre-commit
     @chmod +x .git/hooks/pre-commit
     @echo "Git hooks installed"
 
