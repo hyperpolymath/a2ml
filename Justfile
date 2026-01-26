@@ -197,7 +197,7 @@ demo:
 vectors:
     @echo "Running vector checks..."
     @if command -v rescript >/dev/null 2>&1; then \
-        rescript build; \
+        rescript build prototype/rescript; \
       else \
         echo "rescript not found; install the ReScript compiler." >&2; \
         exit 1; \
@@ -218,7 +218,7 @@ vectors-report:
     @echo "Running vector checks (report)..."
     @mkdir -p build
     @if command -v rescript >/dev/null 2>&1; then \
-        rescript build; \
+        rescript build prototype/rescript; \
       else \
         echo "rescript not found; install the ReScript compiler." >&2; \
         exit 1; \
@@ -237,7 +237,7 @@ vectors-report:
 # Dump A2ML surface AST as JSON
 dump-ast path:
     @if command -v rescript >/dev/null 2>&1; then \
-        rescript build; \
+        rescript build prototype/rescript; \
       else \
         echo "rescript not found; install the ReScript compiler." >&2; \
         exit 1; \
@@ -282,7 +282,7 @@ package-cli:
 # Run CLI (prototype)
 cli *args:
     @if command -v rescript >/dev/null 2>&1; then \
-        rescript build; \
+        rescript build prototype/rescript; \
       else \
         echo "rescript not found; install the ReScript compiler." >&2; \
         exit 1; \
