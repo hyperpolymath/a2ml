@@ -202,7 +202,14 @@ vectors:
         echo "rescript not found; install the ReScript compiler." >&2; \
         exit 1; \
       fi
-    @node prototype/rescript/src/RunVectors.bs.js
+    @if command -v deno >/dev/null 2>&1; then \
+        deno run --allow-read prototype/rescript/src/RunVectors.bs.js; \
+      elif command -v node >/dev/null 2>&1; then \
+        node prototype/rescript/src/RunVectors.bs.js; \
+      else \
+        echo "Neither deno nor node found; install one to run vector checks." >&2; \
+        exit 1; \
+      fi
 
 # Generate justfile cookbook documentation
 cookbook:

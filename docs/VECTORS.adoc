@@ -23,4 +23,4 @@ The vector runner is intentionally small and should be replaced by a full
 conformance harness in v0.3+.
 
 The `just vectors` recipe will run `rescript build -with-deps` before executing
-the runner, so ensure the ReScript compiler is installed and on your PATH.
+the runner. It uses `deno` if available, otherwise falls back to `node`.
