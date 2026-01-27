@@ -4,7 +4,7 @@
 == Current Status
 
 Design phase complete. v0.6.0 draft includes hardened Module 0 parsing,
-aligned vectors, and refreshed docs.
+aligned vectors, refreshed docs, demo build, and core tests passing.
 
 == Milestones
 
@@ -20,7 +20,7 @@ aligned vectors, and refreshed docs.
 * [x] Module 0 parser (surface -> AST) (prototype in `prototype/rescript/`)
 * [x] HTML renderer (basic) (prototype in `prototype/rescript/`)
 * [x] Lax/checked mode validation (basic)
-* [~] Publish web demo page
+* [x] Publish web demo page
 * Target: 2026-03
 
 === v0.3.0 - Attestation Core
@@ -33,7 +33,8 @@ aligned vectors, and refreshed docs.
 * [x] Directive parsing tightened (`@refs`, `@opaque`, attrs)
 * [x] Vector suite aligned and passing
 * [x] CLI docs and help updated
-* [ ] Web demo published
+* [x] Web demo published
+* [x] Core tests runnable via `just core-tests`
 * Target: 2026-02
 
 === v0.4.0 - Web Rendering

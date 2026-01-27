@@ -3,10 +3,10 @@
 
 (state
   (metadata
-    (version "0.5.0")
+    (version "0.6.0")
     (schema-version "1.0")
     (created "2026-01-26")
-    (updated "2026-01-26")
+    (updated "2026-01-27")
     (project "a2ml")
     (repo "hyperpolymath/a2ml"))
 
@@ -16,11 +16,14 @@
     (tech-stack ("spec" "idris2")))
 
   (current-position
-    (phase "implementation")
-    (overall-completion 50)
+    (phase "prototype")
+    (overall-completion 60)
     (working-features
       ("Surface grammar (draft)"
        "Typed core outline"
        "Module 0 quickstart"
        "Prototype parser + validator"
-       "Inline AST"))))
+       "Inline AST"
+       "Vector suite passing"
+       "Demo build"
+       "Core tests passing"))))

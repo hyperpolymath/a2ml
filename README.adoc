@@ -58,9 +58,9 @@ A2ML is a typed, attested markup format. It verifies structure and references.
 
 == Idris2 Core
 
-* link:src/TypedCore.idr[Typed core stub]
-* link:src/Translator.idr[Translation stub]
-* link:src/Surface.idr[Surface AST]
+* link:src/A2ML/TypedCore.idr[Typed core stub]
+* link:src/A2ML/Translator.idr[Translation stub]
+* link:src/A2ML/Surface.idr[Surface AST]
 * link:docs/AST-JSON.adoc[Surface AST JSON (prototype)]
 * link:docs/DIRECTIVE-MAPPING.adoc[Directive Mapping (prototype)]
 * link:docs/INLINE-RULES.adoc[Inline Rules (prototype)]
@@ -98,8 +98,9 @@ A2ML is a typed, attested markup format. It verifies structure and references.
 
 == Status
 
-* Draft specification, v0
-* No reference implementation yet
+* Draft specification, v0.6.0
+* Prototype parser + CLI + demo page available
+* Typed core stubs + core tests passing (prototype)
 
 == License
 
