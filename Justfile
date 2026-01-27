@@ -293,8 +293,13 @@ dump-ast path:
 core-tests:
     @if command -v idris2 >/dev/null 2>&1; then \
         mkdir -p build; \
-        idris2 -i src tests/CoreTests.idr -o build/core-tests; \
-        ./build/core-tests; \
+        idris2 --codegen node --source-dir src src/A2ML/CoreTests.idr -o build/core-tests.js; \
+        if [ ! -f build/exec/build/core-tests.js ]; then \
+          echo "core-tests output not found; expected build/exec/build/core-tests.js" >&2; \
+          exit 1; \
+        fi; \
+        cp -f build/exec/build/core-tests.js build/core-tests.js; \
+        node build/core-tests.js; \
       else \
         echo "idris2 not found; install Idris2 to run core tests." >&2; \
         exit 1; \

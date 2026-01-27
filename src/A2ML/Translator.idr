@@ -6,6 +6,7 @@ import A2ML.Surface
 -- Minimal translation: headings become sections with generated IDs,
 -- paragraphs and lists map directly. Directives map based on name.
 
+export
 translate : SDoc -> Doc
 translate (MkSDoc bs) = MkDoc (map toBlock bs)
   where

@@ -27,13 +27,11 @@ mkSurface = MkSDoc [
 main : IO ()
 main = do
   let errs = validateDoc mkSampleDoc
-  if errs == [] then
-    putStrLn "validateDoc: ok"
-  else
-    putStrLn ("validateDoc: failed: " ++ show errs)
+  case errs == [] of
+    True => putStrLn "validateDoc: ok"
+    False => putStrLn ("validateDoc: failed: " ++ show errs)
 
   let core = translate mkSurface
-  if uniqueIdsB core then
-    putStrLn "translate: ok"
-  else
-    putStrLn "translate: duplicate ids"
+  case uniqueIdsB core of
+    True => putStrLn "translate: ok"
+    False => putStrLn "translate: duplicate ids"

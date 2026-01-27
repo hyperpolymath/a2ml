@@ -5,19 +5,19 @@
 
 * Partial run completed (vectors)
 * Target: v1 release
-* Latest update: 2026-01-26
+* Latest update: 2026-01-27
 
 == Artifacts
 
 * `build/vector-report.json` (from `just vectors-report`)
-* AST dumps for reference inputs (from `just dump-ast`)
+* `build/ast-module0.json` (from `just dump-ast tests/vectors/module0-basic.a2ml`)
 * Typed core checks (from `just core-tests`)
 
 == Results
 
 * Vectors: PASS (Module 0 vectors, 2026-01-26)
-* AST dumps: pending
-* Typed core checks: pending
+* AST dumps: PASS (module0-basic, 2026-01-27)
+* Typed core checks: PASS (2026-01-27)
 
 == Procedure
 
