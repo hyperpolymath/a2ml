@@ -29,10 +29,7 @@ type parseError = {
 }
 
 let isChar = (s: string, i: int, ch: string): bool => {
-  switch String.get(s, i) {
-  | Some(c) => c == ch
-  | None => false
-  }
+  i >= 0 && i < String.length(s) && String.slice(s, ~start=i, ~end=i + 1) == ch
 }
 
 let indexOfOpt = (s: string, sub: string): option<int> => {
