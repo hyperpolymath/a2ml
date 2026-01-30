@@ -17,18 +17,22 @@
 
   (current-position
     (phase "prototype")
-    (overall-completion 45)  ; ReScript v12 fixed, tests passing
+    (overall-completion 60)  ; Idris2 parser + proofs working!
     (working-features
       ("Surface grammar implemented"
-       "ReScript parser and renderer functional"
+       "Idris2 parser with decidable proofs - WORKING"
+       "Proof obligations execute (UniqueIds, RefsResolve, HasAbstract)"
+       "Compiles to JavaScript (45KB)"
+       "ReScript parser and renderer functional (legacy)"
        "CLI tools (validate, render, ast)"
        "23 test vectors defined - ALL PASSING"
-       "Typed core outline (Idris2)"
+       "Typed core (Idris2)"
        "Module 0 quickstart"
        "ReScript v12 compatibility layer complete"))
     (needs-work
-      ("Ada TUI incomplete"
+      ("ReScript bindings to Idris2 JS output"
+       "Integrate Idris2 parser into web demo"
+       "Ada TUI incomplete"
        "Git tags for v0.5.0, v0.6.0 never created"
-       "Idris2 proof obligations need decidable types"
-       "WASM demo incomplete"
+       "WASM demo (deferred to v1.1)"
        "Web component not implemented"))))
