@@ -4,6 +4,7 @@
     "fs": "node:fs"
   },
   "permissions": {
-    "read": true
+    "read": true,
+    "write": true
   }
 }
