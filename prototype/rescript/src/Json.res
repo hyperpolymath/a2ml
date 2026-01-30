@@ -1,54 +1,50 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
 
-let inlineToJson = (part: A2ml.inline): JSON.t => {
+open Compat
+
+// Simple JSON encoding without external dependencies
+let escapeString = (s: string): string => {
+  // Basic escaping for JSON strings
+  let s1 = replace(s, "\\", "\\\\")
+  let s2 = replace(s1, "\"", "\\\"")
+  let s3 = replace(s2, "\n", "\\n")
+  s3
+}
+
+let inlineToJson = (part: A2ml.inline): string => {
   switch part {
   | Text(t) =>
-      JSON.Encode.object(Dict.fromArray([("type", JSON.Encode.string("text")), ("text", JSON.Encode.string(t))]))
+      `{"type":"text","text":"${escapeString(t)}"}`
   | Emph(t) =>
-      JSON.Encode.object(Dict.fromArray([("type", JSON.Encode.string("emph")), ("text", JSON.Encode.string(t))]))
+      `{"type":"emph","text":"${escapeString(t)}"}`
   | Strong(t) =>
-      JSON.Encode.object(Dict.fromArray([("type", JSON.Encode.string("strong")), ("text", JSON.Encode.string(t))]))
+      `{"type":"strong","text":"${escapeString(t)}"}`
   | Link(label, url) =>
-      JSON.Encode.object(Dict.fromArray([
-        ("type", JSON.Encode.string("link")),
-        ("label", JSON.Encode.string(label)),
-        ("url", JSON.Encode.string(url)),
-      ]))
+      `{"type":"link","label":"${escapeString(label)}","url":"${escapeString(url)}"}`
   }
 }
 
-let rec blockToJson = (block: A2ml.block): JSON.t => {
+let rec blockToJson = (block: A2ml.block): string => {
   switch block {
   | Heading(level, text) =>
-      JSON.Encode.object(Dict.fromArray([
-        ("type", JSON.Encode.string("heading")),
-        ("level", JSON.Encode.float(Int.toFloat(level))),
-        ("text", JSON.Encode.string(text)),
-      ]))
+      `{"type":"heading","level":${intToString(level)},"text":"${escapeString(text)}"}`
   | Paragraph(parts) =>
-      JSON.Encode.object(Dict.fromArray([
-        ("type", JSON.Encode.string("paragraph")),
-        ("inline", JSON.Encode.array(parts->Belt.Array.map(inlineToJson))),
-      ]))
+      let items = parts->arrayMap(inlineToJson)->arrayJoin(",")
+      `{"type":"paragraph","content":[${items}]}`
   | List(items) =>
-      let rows = items->Belt.Array.map(parts => JSON.Encode.array(parts->Belt.Array.map(inlineToJson)))
-      JSON.Encode.object(Dict.fromArray([
-        ("type", JSON.Encode.string("list")),
-        ("items", JSON.Encode.array(rows)),
-      ]))
+      let itemsJson = items->arrayMap(parts => {
+        let content = parts->arrayMap(inlineToJson)->arrayJoin(",")
+        `[${content}]`
+      })->arrayJoin(",")
+      `{"type":"list","items":[${itemsJson}]}`
   | Directive(name, attrs, body) =>
-      let attrsJson = attrs->Belt.Array.map(((k, v)) =>
-        JSON.Encode.object(Dict.fromArray([("key", JSON.Encode.string(k)), ("value", JSON.Encode.string(v))]))
-      )
-      JSON.Encode.object(Dict.fromArray([
-        ("type", JSON.Encode.string("directive")),
-        ("name", JSON.Encode.string(name)),
-        ("attrs", JSON.Encode.array(attrsJson)),
-        ("body", JSON.Encode.array(body->Belt.Array.map(blockToJson))),
-      ]))
+      let attrsJson = attrs->arrayMap(((k, v)) => `"${escapeString(k)}":"${escapeString(v)}"`)->arrayJoin(",")
+      let bodyJson = body->arrayMap(blockToJson)->arrayJoin(",")
+      `{"type":"directive","name":"${escapeString(name)}","attrs":{${attrsJson}},"body":[${bodyJson}]}`
   }
 }
 
-let docToJson = (doc: A2ml.doc): JSON.t => {
-  JSON.Encode.array(doc->Belt.Array.map(blockToJson))
+let docToJson = (doc: A2ml.doc): string => {
+  let blocks = doc->arrayMap(blockToJson)->arrayJoin(",")
+  `{"blocks":[${blocks}]}`
 }

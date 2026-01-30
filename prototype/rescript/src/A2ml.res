@@ -3,6 +3,59 @@
 // Minimal Module-0 parser and checked validator for web rendering demos.
 // This is intentionally small but deterministic.
 
+// Use external bindings for JavaScript String and Array methods (ReScript v12 compatible)
+@get external length: string => int = "length"
+@send external slice: (string, ~start: int, ~end: int) => string = "slice"
+@send external sliceToEnd: (string, ~from: int) => string = "slice"
+@send external trim: string => string = "trim"
+@send external indexOf: (string, string) => int = "indexOf"
+@send external split: (string, string) => array<string> = "split"
+@send external startsWith: (string, string) => bool = "startsWith"
+@send external endsWith: (string, string) => bool = "endsWith"
+
+// Int methods
+@val external intToString: int => string = "String"
+
+// Array methods
+@get external arrayLength: array<'a> => int = "length"
+@send external arrayPush: (array<'a>, 'a) => unit = "push"
+@send external arrayConcat: (array<'a>, array<'a>) => array<'a> = "concat"
+@send external arrayReverse: array<'a> => array<'a> = "reverse"
+@send external arrayMap: (array<'a>, 'a => 'b) => array<'b> = "map"
+@send external arrayFilter: (array<'a>, 'a => bool) => array<'a> = "filter"
+@send external arrayReduceNative: (array<'a>, ('b, 'a) => 'b, 'b) => 'b = "reduce"
+
+let arrayReduce = (arr: array<'a>, init: 'b, fn: ('b, 'a) => 'b): 'b => {
+  arrayReduceNative(arr, fn, init)
+}
+@send external arrayJoin: (array<'a>, string) => string = "join"
+@send external arrayForEach: (array<'a>, 'a => unit) => unit = "forEach"
+let arrayForEachWithIndex = (arr: array<'a>, fn: (int, 'a) => unit): unit => {
+  let idx = ref(0)
+  arr->arrayForEach(item => {
+    fn(idx.contents, item)
+    idx.contents = idx.contents + 1
+  })
+}
+@get_index external arrayGet: (array<'a>, int) => 'a = ""
+
+// Helper functions
+let arrayKeepMap = (arr: array<'a>, fn: 'a => option<'b>): array<'b> => {
+  arr->arrayMap(fn)->arrayFilter(x => switch x { | None => false | Some(_) => true })->arrayMap(x => switch x { | Some(v) => v | None => assert(false) })
+}
+
+let arrayGetExn = (arr: array<'a>, idx: int): 'a => {
+  arrayGet(arr, idx)
+}
+
+let arrayJoinWith = (arr: array<'a>, sep: string, fn: 'a => string): string => {
+  arr->arrayMap(fn)->arrayJoin(sep)
+}
+
+let arrayMake = (_size: int, _default: 'a): array<'a> => {
+  []
+}
+
 type attrs = array<(string, string)>
 
 type inline =
@@ -29,28 +82,30 @@ type parseError = {
 }
 
 let isChar = (s: string, i: int, ch: string): bool => {
-  i >= 0 && i < String.length(s) && String.slice(s, ~start=i, ~end=i + 1) == ch
+  i >= 0 && i < length(s) && slice(s, ~start=i, ~end=i + 1) == ch
 }
 
 let indexOfOpt = (s: string, sub: string): option<int> => {
-  let idx = String.indexOf(s, sub)
+  let idx = indexOf(s, sub)
   if idx < 0 { None } else { Some(idx) }
 }
 
 let indexFromOpt = (s: string, start: int, sub: string): option<int> => {
-  let idx = String.indexOfFrom(s, sub, start)
-  if idx < 0 { None } else { Some(idx) }
+  // Js.String2 doesn't have indexOfFrom, so slice and search
+  let sliced = sliceToEnd(s, ~from=start)
+  let idx = indexOf(sliced, sub)
+  if idx < 0 { None } else { Some(idx + start) }
 }
 
 let isHeading = (line: string): option<(int, string)> => {
-  let trimmed = String.trim(line)
+  let trimmed = trim(line)
   let rec countHashes = (i, count) =>
-    if i >= String.length(trimmed) {count} else {
+    if i >= length(trimmed) {count} else {
       if isChar(trimmed, i, "#") {countHashes(i + 1, count + 1)} else {count}
     }
   let hcount = countHashes(0, 0)
   if hcount > 0 && hcount <= 5 {
-    let text = String.trim(String.slice(trimmed, ~start=hcount))
+    let text = trim(sliceToEnd(trimmed, ~from=hcount))
     Some((hcount, text))
   } else {
     None
@@ -70,18 +125,18 @@ let parseAttrs = (line: string): attrs => {
   if start == -1 || end_ == -1 || end_ < start {
     []
   } else {
-    let inner = String.slice(line, ~start=start + 1, ~end=end_)
-    let parts = String.split(inner, ",")
+    let inner = slice(line, ~start=start + 1, ~end=end_)
+    let parts = split(inner, ",")
     parts
-    ->Belt.Array.keepMap(part => {
-        let kv = String.split(String.trim(part), "=")
-        if Belt.Array.length(kv) == 2 {
-          let key = kv->Belt.Array.getExn(0)->String.trim
-          let value = kv->Belt.Array.getExn(1)->String.trim
+    ->arrayKeepMap(part => {
+        let kv = split(trim(part), "=")
+        if arrayLength(kv) == 2 {
+          let key = kv->arrayGetExn(0)->trim
+          let value = kv->arrayGetExn(1)->trim
           let unquoted =
-            if (String.startsWith(value, "\"") && String.endsWith(value, "\"")) ||
-                (String.startsWith(value, "'") && String.endsWith(value, "'")) {
-              String.slice(value, ~start=1, ~end=String.length(value) - 1)
+            if (startsWith(value, "\"") && endsWith(value, "\"")) ||
+                (startsWith(value, "'") && endsWith(value, "'")) {
+              slice(value, ~start=1, ~end=length(value) - 1)
             } else {
               value
             }
@@ -94,76 +149,76 @@ let parseAttrs = (line: string): attrs => {
 }
 
 let isDirectiveStart = (line: string): bool => {
-  let trimmed = String.trim(line)
-  String.startsWith(trimmed, "@") && String.endsWith(trimmed, ":")
+  let trimmed = trim(line)
+  startsWith(trimmed, "@") && endsWith(trimmed, ":")
 }
 
 let parseInline = (text: string): array<inline> => {
   // Simple, non-nested parser for strong/emph/link in one pass.
   let rec loop = (i, acc) =>
-    if i >= String.length(text) {
-      Belt.Array.reverse(acc)
-    } else if i + 1 < String.length(text) && String.slice(text, ~start=i, ~end=i + 2) == "**" {
+    if i >= length(text) {
+      arrayReverse(acc)
+    } else if i + 1 < length(text) && slice(text, ~start=i, ~end=i + 2) == "**" {
       let close = indexFromOpt(text, i + 2, "**")
       switch close {
-      | None => loop(i + 2, Belt.Array.concat([Text("**")], acc))
+      | None => loop(i + 2, arrayConcat([Text("**")], acc))
       | Some(j) =>
-        let content = String.slice(text, ~start=i + 2, ~end=j)
-        loop(j + 2, Belt.Array.concat([Strong(content)], acc))
+        let content = slice(text, ~start=i + 2, ~end=j)
+        loop(j + 2, arrayConcat([Strong(content)], acc))
       }
     } else if isChar(text, i, "*") {
       let close = indexFromOpt(text, i + 1, "*")
       switch close {
-      | None => loop(i + 1, Belt.Array.concat([Text("*")], acc))
+      | None => loop(i + 1, arrayConcat([Text("*")], acc))
       | Some(j) =>
-        let content = String.slice(text, ~start=i + 1, ~end=j)
-        loop(j + 1, Belt.Array.concat([Emph(content)], acc))
+        let content = slice(text, ~start=i + 1, ~end=j)
+        loop(j + 1, arrayConcat([Emph(content)], acc))
       }
     } else if isChar(text, i, "[") {
       let closeText = indexFromOpt(text, i + 1, "]")
       switch closeText {
-      | None => loop(i + 1, Belt.Array.concat([Text("[")], acc))
+      | None => loop(i + 1, arrayConcat([Text("[")], acc))
       | Some(j) =>
-        if j + 1 < String.length(text) && isChar(text, j + 1, "(") {
+        if j + 1 < length(text) && isChar(text, j + 1, "(") {
           let closeUrl = indexFromOpt(text, j + 2, ")")
           switch closeUrl {
-          | None => loop(i + 1, Belt.Array.concat([Text("[")], acc))
+          | None => loop(i + 1, arrayConcat([Text("[")], acc))
           | Some(k) =>
-            let label = String.slice(text, ~start=i + 1, ~end=j)
-            let url = String.slice(text, ~start=j + 2, ~end=k)
-            loop(k + 1, Belt.Array.concat([Link(label, url)], acc))
+            let label = slice(text, ~start=i + 1, ~end=j)
+            let url = slice(text, ~start=j + 2, ~end=k)
+            loop(k + 1, arrayConcat([Link(label, url)], acc))
           }
         } else {
-          loop(i + 1, Belt.Array.concat([Text("[")], acc))
+          loop(i + 1, arrayConcat([Text("[")], acc))
         }
       }
     } else {
       let nextSpecial = ["*", "["]
-        ->Belt.Array.keepMap(ch => indexFromOpt(text, i, ch))
+        ->arrayKeepMap(ch => indexFromOpt(text, i, ch))
       let next =
-        if Belt.Array.length(nextSpecial) == 0 {
-          String.length(text)
+        if arrayLength(nextSpecial) == 0 {
+          length(text)
         } else {
-          Belt.Array.reduce(nextSpecial, String.length(text), (a, b) => if b < a {b} else {a})
+          arrayReduce(nextSpecial, length(text), (a, b) => if b < a {b} else {a})
         }
-      let chunk = String.slice(text, ~start=i, ~end=next)
-      loop(next, Belt.Array.concat([Text(chunk)], acc))
+      let chunk = slice(text, ~start=i, ~end=next)
+      loop(next, arrayConcat([Text(chunk)], acc))
     }
   loop(0, [])
 }
 
 let parseDirectiveHeader = (line: string): (string, string) => {
-  let trimmed = String.trim(line)
-  let withoutAt = String.slice(trimmed, ~start=1)
+  let trimmed = trim(line)
+  let withoutAt = sliceToEnd(trimmed, ~from=1)
   let body =
-    if String.endsWith(withoutAt, ":") {
-      String.slice(withoutAt, ~start=0, ~end=String.length(withoutAt) - 1)
+    if endsWith(withoutAt, ":") {
+      slice(withoutAt, ~start=0, ~end=length(withoutAt) - 1)
     } else {
       withoutAt
     }
   let nameOnly = switch indexOfOpt(body, "(") {
     | None => body
-    | Some(idx) => String.slice(body, ~start=0, ~end=idx)
+    | Some(idx) => slice(body, ~start=0, ~end=idx)
   }
   (nameOnly, body)
 }
@@ -173,17 +228,17 @@ let parseDirectiveLines = (
   startIndex: int,
   parseLine: string => option<block>,
 ): (array<block>, int) => {
-  let blocks = Belt.Array.make(0, Paragraph([]))
+  let blocks = arrayMake(0, Paragraph([]))
   let rec loop = i =>
-    if i >= Belt.Array.length(lines) {
+    if i >= arrayLength(lines) {
       (blocks, i)
     } else {
-      let line = Belt.Array.getExn(lines, i)
-      if String.trim(line) == "@end" {
+      let line = arrayGetExn(lines, i)
+      if trim(line) == "@end" {
         (blocks, i + 1)
       } else {
         switch parseLine(line) {
-        | Some(block) => blocks->Belt.Array.push(block)
+        | Some(block) => blocks->arrayPush(block)
         | None => ()
         }
         loop(i + 1)
@@ -193,21 +248,21 @@ let parseDirectiveLines = (
 }
 
 let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): (array<block>, int) => {
-  let blocks = Belt.Array.make(0, Paragraph([]))
+  let blocks = arrayMake(0, Paragraph([]))
 
   let rec loop = i => {
-    if i >= Belt.Array.length(lines) {
+    if i >= arrayLength(lines) {
       (blocks, i)
     } else {
-      let line = Belt.Array.getExn(lines, i)
-      if stopAtEnd && String.trim(line) == "@end" {
+      let line = arrayGetExn(lines, i)
+      if stopAtEnd && trim(line) == "@end" {
         (blocks, i + 1)
-      } else if String.trim(line) == "" {
+      } else if trim(line) == "" {
         loop(i + 1)
       } else {
         switch isHeading(line) {
         | Some((level, text)) => {
-            blocks->Belt.Array.push(Heading(level, text))
+            blocks->arrayPush(Heading(level, text))
             loop(i + 1)
           }
         | None =>
@@ -216,19 +271,19 @@ let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): 
             let attrs = parseAttrs(body)
             if nameOnly == "opaque" {
               let rec collectRaw = (j, acc) =>
-                if j >= Belt.Array.length(lines) {
+                if j >= arrayLength(lines) {
                   (j, acc)
                 } else {
-                  let rawLine = Belt.Array.getExn(lines, j)
-                  if String.trim(rawLine) == "@end" {
+                  let rawLine = arrayGetExn(lines, j)
+                  if trim(rawLine) == "@end" {
                     (j + 1, acc)
                   } else {
-                    collectRaw(j + 1, Belt.Array.concat(acc, [rawLine]))
+                    collectRaw(j + 1, arrayConcat(acc, [rawLine]))
                   }
                 }
               let (nextIndex, rawLines) = collectRaw(i + 1, [])
-              let rawText = rawLines->Belt.Array.joinWith("\n", s => s)
-              blocks->Belt.Array.push(Directive(nameOnly, attrs, [Paragraph([Text(rawText)])]))
+              let rawText = rawLines->arrayJoinWith("\n", s => s)
+              blocks->arrayPush(Directive(nameOnly, attrs, [Paragraph([Text(rawText)])]))
               loop(nextIndex)
             } else if nameOnly == "refs" {
               let (refBlocks, nextIndex) =
@@ -236,7 +291,7 @@ let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): 
                   lines,
                   i + 1,
                   refLine => {
-                    let trimmed = String.trim(refLine)
+                    let trimmed = trim(refLine)
                     if trimmed == "" {
                       None
                     } else {
@@ -244,45 +299,45 @@ let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): 
                     }
                   },
                 )
-              blocks->Belt.Array.push(Directive(nameOnly, attrs, refBlocks))
+              blocks->arrayPush(Directive(nameOnly, attrs, refBlocks))
               loop(nextIndex)
             } else {
               let (innerBlocks, nextIndex) = parseBlocks(lines, i + 1, true)
-              blocks->Belt.Array.push(Directive(nameOnly, attrs, innerBlocks))
+              blocks->arrayPush(Directive(nameOnly, attrs, innerBlocks))
               loop(nextIndex)
             }
-          } else if String.startsWith(String.trim(line), "-") {
+          } else if startsWith(trim(line), "-") {
             let rec collect = (j, acc) =>
-              if j >= Belt.Array.length(lines) { (j, acc) } else {
-                let l = String.trim(Belt.Array.getExn(lines, j))
-                if String.startsWith(l, "-") {
-                  let item = String.trim(String.slice(l, ~start=1))
-                  collect(j + 1, Belt.Array.concat(acc, [parseInline(item)]))
+              if j >= arrayLength(lines) { (j, acc) } else {
+                let l = trim(arrayGetExn(lines, j))
+                if startsWith(l, "-") {
+                  let item = trim(sliceToEnd(l, ~from=1))
+                  collect(j + 1, arrayConcat(acc, [parseInline(item)]))
                 } else {
                   (j, acc)
                 }
               }
             let (nextIndex, items) = collect(i, [])
-            blocks->Belt.Array.push(List(items))
+            blocks->arrayPush(List(items))
             loop(nextIndex)
           } else {
             // Multi-line paragraph: continue until blank or structural block
             let rec collect = (j, acc) =>
-              if j >= Belt.Array.length(lines) { (j, acc) } else {
-                let l = Belt.Array.getExn(lines, j)
-                if String.trim(l) == "" ||
-                   (stopAtEnd && String.trim(l) == "@end") ||
+              if j >= arrayLength(lines) { (j, acc) } else {
+                let l = arrayGetExn(lines, j)
+                if trim(l) == "" ||
+                   (stopAtEnd && trim(l) == "@end") ||
                    isDirectiveStart(l) ||
-                   String.startsWith(String.trim(l), "-") ||
+                   startsWith(trim(l), "-") ||
                    isHeading(l) != None {
                   (j, acc)
                 } else {
-                  collect(j + 1, Belt.Array.concat(acc, [String.trim(l)]))
+                  collect(j + 1, arrayConcat(acc, [trim(l)]))
                 }
               }
             let (nextIndex, parts) = collect(i, [])
-            let text = parts->Belt.Array.joinWith(" ", s => s)
-            blocks->Belt.Array.push(Paragraph(parseInline(text)))
+            let text = parts->arrayJoinWith(" ", s => s)
+            blocks->arrayPush(Paragraph(parseInline(text)))
             loop(nextIndex)
           }
         }
@@ -295,14 +350,14 @@ let rec parseBlocks = (lines: array<string>, startIndex: int, stopAtEnd: bool): 
 
 let parse = (~mode: parseMode=Lax, input: string): doc => {
   let _ = mode
-  let lines = String.split(input, "\n")
+  let lines = split(input, "\n")
   let (blocks, _index) = parseBlocks(lines, 0, false)
   blocks
 }
 
 let renderInline = (parts: array<inline>): string => {
   parts
-  ->Belt.Array.map(part =>
+  ->arrayMap(part =>
       switch part {
       | Text(t) => t
       | Emph(t) => "<em>" ++ t ++ "</em>"
@@ -310,57 +365,67 @@ let renderInline = (parts: array<inline>): string => {
       | Link(label, url) => "<a href=\"" ++ url ++ "\">" ++ label ++ "</a>"
       }
     )
-  ->Belt.Array.joinWith("", s => s)
+  ->arrayJoinWith("", s => s)
 }
 
 let rec renderBlocks = (blocks: array<block>): string => {
   blocks
-  ->Belt.Array.map(block =>
+  ->arrayMap(block =>
       switch block {
       | Heading(level, text) =>
-          "<h" ++ Int.toString(level) ++ ">" ++ text ++ "</h" ++ Int.toString(level) ++ ">"
+          "<h" ++ intToString(level) ++ ">" ++ text ++ "</h" ++ intToString(level) ++ ">"
       | Paragraph(parts) => "<p>" ++ renderInline(parts) ++ "</p>"
       | List(items) =>
           let lis =
             items
-            ->Belt.Array.map(item => "<li>" ++ renderInline(item) ++ "</li>")
-            ->Belt.Array.joinWith("", s => s)
+            ->arrayMap(item => "<li>" ++ renderInline(item) ++ "</li>")
+            ->arrayJoinWith("", s => s)
           "<ul>" ++ lis ++ "</ul>"
       | Directive(name, attrs, body) =>
           let content = renderBlocks(body)
           let attrsString = attrs
-            ->Belt.Array.map(((k, v)) => k ++ "=\"" ++ v ++ "\"")
-            ->Belt.Array.joinWith(" ", s => s)
+            ->arrayMap(((k, v)) => k ++ "=\"" ++ v ++ "\"")
+            ->arrayJoinWith(" ", s => s)
           let dataAttr = if attrsString == "" {""} else {" " ++ attrsString}
           "<div data-a2ml=\"" ++ name ++ "\"" ++ dataAttr ++ ">" ++ content ++ "</div>"
       }
     )
-  ->Belt.Array.joinWith("\n", s => s)
+  ->arrayJoinWith("\n", s => s)
 }
 
 let renderHtml = (doc: doc): string => {
   renderBlocks(doc)
 }
 
+// Simple set implementation for strings
+type stringSet = array<string>
+let setEmpty = (): stringSet => []
+let setHas = (set: stringSet, value: string): bool => {
+  set->arrayMap(x => x == value)->arrayReduce(false, (acc, x) => acc || x)
+}
+let setAdd = (set: stringSet, value: string): stringSet => {
+  if setHas(set, value) { set } else { arrayConcat(set, [value]) }
+}
+
 let validate = (doc: doc): array<parseError> => {
-  let ids = ref(Belt.Set.String.empty)
-  let refs = Belt.Array.make(0, ("", 0))
-  let errors = Belt.Array.make(0, {line: 0, msg: ""})
+  let ids = ref(setEmpty())
+  let refs = arrayMake(0, ("", 0))
+  let errors = arrayMake(0, {line: 0, msg: ""})
 
   let rec walk = (blocks: array<block>, depthLine: int) => {
-    blocks->Belt.Array.forEachWithIndex((i, block) => {
+    blocks->arrayForEachWithIndex((i, block) => {
       let lineNo = depthLine + i + 1
       switch block {
       | Directive(_name, attrs, body) =>
-          attrs->Belt.Array.forEach(((k, v)) => {
+          attrs->arrayForEach(((k, v)) => {
             if k == "id" {
-              if Belt.Set.String.has(ids.contents, v) {
-                errors->Belt.Array.push({line: lineNo, msg: "duplicate id: " ++ v})
+              if setHas(ids.contents, v) {
+                errors->arrayPush({line: lineNo, msg: "duplicate id: " ++ v})
               } else {
-                ids.contents = Belt.Set.String.add(ids.contents, v)
+                ids.contents = setAdd(ids.contents, v)
               }
             } else if k == "ref" {
-              refs->Belt.Array.push((v, lineNo))
+              refs->arrayPush((v, lineNo))
             } else {
               ()
             }
@@ -373,18 +438,20 @@ let validate = (doc: doc): array<parseError> => {
 
   walk(doc, 0)
 
-  refs->Belt.Array.forEach(((refId, lineNo)) => {
-    if !Belt.Set.String.has(ids.contents, refId) {
-      errors->Belt.Array.push({line: lineNo, msg: "unresolved reference \"" ++ refId ++ "\""})
+  refs->arrayForEach(((refId, lineNo)) => {
+    if !setHas(ids.contents, refId) {
+      errors->arrayPush({line: lineNo, msg: "unresolved reference \"" ++ refId ++ "\""})
     }
   })
 
   errors
 }
 
+let setFromArray = (arr: array<string>): stringSet => arr
+
 let validateChecked = (doc: doc): array<parseError> => {
   let errors = validate(doc)
-  let allowed = Belt.Set.String.fromArray([
+  let allowed = setFromArray([
     "abstract",
     "refs",
     "fig",
@@ -395,12 +462,12 @@ let validateChecked = (doc: doc): array<parseError> => {
   ])
 
   let rec walk = (blocks: array<block>, depthLine: int) => {
-    blocks->Belt.Array.forEachWithIndex((i, block) => {
+    blocks->arrayForEachWithIndex((i, block) => {
       let lineNo = depthLine + i + 1
       switch block {
       | Directive(name, _attrs, body) =>
-          if !Belt.Set.String.has(allowed, name) {
-            errors->Belt.Array.push({line: lineNo, msg: "unknown directive: " ++ name})
+          if !setHas(allowed, name) {
+            errors->arrayPush({line: lineNo, msg: "unknown directive: " ++ name})
           }
           walk(body, lineNo)
       | _ => ()

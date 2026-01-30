@@ -2,6 +2,8 @@
 
 // Minimal test vector runner for Module 0.
 
+open Compat
+
 module Fs = {
   @module("fs")
   external readdirSync: string => array<string> = "readdirSync"
@@ -13,21 +15,27 @@ module Fs = {
   external existsSync: string => bool = "existsSync"
 }
 
+@send external includes: (string, string) => bool = "includes"
+
+let regexReplace = (s: string, pattern: string, replacement: string): string => {
+  %raw(`s.replace(new RegExp(pattern, 'g'), replacement)`)
+}
+
 let listVectors = (): array<(string, string)> => {
 let files = Fs.readdirSync("tests/vectors")
 files
-->Belt.Array.keep(file => String.endsWith(file, ".a2ml"))
-->Belt.Array.map(file => {
-    let expected = String.replace(file, ".a2ml", ".expected")
+->arrayKeep(file => endsWith(file, ".a2ml"))
+->arrayMap(file => {
+    let expected = replace(file, ".a2ml", ".expected")
     ("tests/vectors/" ++ file, "tests/vectors/" ++ expected)
   })
 }
 
 let parseExpected = (text: string): option<string> => {
-  let lines = String.split(text, "\n")
-  let errorLine = lines->Belt.Array.keep(line => String.startsWith(line, "ERROR:"))
-  if Belt.Array.length(errorLine) > 0 {
-    Some(String.trim(String.slice(errorLine->Belt.Array.getExn(0), ~start=6)))
+  let lines = split(text, "\n")
+  let errorLine = lines->arrayKeep(line => startsWith(line, "ERROR:"))
+  if arrayLength(errorLine) > 0 {
+    Some(trim(sliceToEnd(arrayGetExn(errorLine, 0), ~from=6)))
   } else {
     None
   }
@@ -35,15 +43,15 @@ let parseExpected = (text: string): option<string> => {
 
 let normalizeHtml = (html: string): string => {
   // Collapse whitespace for stable comparison.
-  let re = %re("/\\s+/")
-  Js.String.replaceByRe(re, " ", html)->String.trim
+  let normalized = regexReplace(html, "\\s+", " ")
+  trim(normalized)
 }
 
 let run = (): int => {
   let vectors = listVectors()
-  let failures = Belt.Array.make(0, "")
+  let failures = arrayMake(0, "")
 
-  vectors->Belt.Array.forEach(((inputPath, expectedPath)) => {
+  vectors->arrayForEach(((inputPath, expectedPath)) => {
     let input = Fs.readFileSync(inputPath, "utf8")
     let expected = Fs.readFileSync(expectedPath, "utf8")
 
@@ -53,35 +61,35 @@ let run = (): int => {
 
     switch expectedError {
     | None =>
-        if Belt.Array.length(errors) > 0 {
-          failures->Belt.Array.push(inputPath ++ ": expected ok, got error")
+        if arrayLength(errors) > 0 {
+          failures->arrayPush(inputPath ++ ": expected ok, got error")
         }
     | Some(msg) =>
-        if Belt.Array.length(errors) == 0 {
-          failures->Belt.Array.push(inputPath ++ ": expected error, got ok")
+        if arrayLength(errors) == 0 {
+          failures->arrayPush(inputPath ++ ": expected error, got ok")
         } else {
-          let first = errors->Belt.Array.getExn(0)
-  if !String.includes(first.msg, msg) {
-            failures->Belt.Array.push(inputPath ++ ": error mismatch")
+          let first = arrayGetExn(errors, 0)
+  if !includes(first.msg, msg) {
+            failures->arrayPush(inputPath ++ ": error mismatch")
           }
         }
     }
 
-let htmlExpectedPath = String.replace(inputPath, ".a2ml", ".html.expected")
+let htmlExpectedPath = replace(inputPath, ".a2ml", ".html.expected")
     if Fs.existsSync(htmlExpectedPath) {
       let actualHtml = A2ml.renderHtml(doc)->normalizeHtml
       let expectedHtml = Fs.readFileSync(htmlExpectedPath, "utf8")->normalizeHtml
       if actualHtml != expectedHtml {
-        failures->Belt.Array.push(inputPath ++ ": html mismatch")
+        failures->arrayPush(inputPath ++ ": html mismatch")
       }
     }
   })
 
-  if Belt.Array.length(failures) == 0 {
-  Console.log("All vectors passed")
+  if arrayLength(failures) == 0 {
+  consoleLog("All vectors passed")
     0
   } else {
-  failures->Belt.Array.forEach(msg => Console.log(msg))
+  failures->arrayForEach(msg => consoleLog(msg))
     1
   }
 }

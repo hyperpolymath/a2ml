@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
+open Compat
 
 let hasDeno = %raw(`typeof Deno !== "undefined"`)
 
@@ -44,17 +45,17 @@ let helpText = "A2ML CLI (prototype)\n\n" ++
   "  * For multiple files, --concat joins outputs in order.\n"
 
 let usage = (): unit => {
-  Console.log(helpText)
+  consoleLog(helpText)
   exit(1)
 }
 
 let getArg = (args: array<string>, name: string): option<string> => {
   let rec loop = i =>
-    if i >= Belt.Array.length(args) {
+    if i >= arrayLength(args) {
       None
-    } else if Belt.Array.getExn(args, i) == name {
-      if i + 1 < Belt.Array.length(args) {
-        Some(Belt.Array.getExn(args, i + 1))
+    } else if arrayGetExn(args, i) == name {
+      if i + 1 < arrayLength(args) {
+        Some(arrayGetExn(args, i + 1))
       } else {
         None
       }
@@ -65,20 +66,20 @@ let getArg = (args: array<string>, name: string): option<string> => {
 }
 
 let hasFlag = (args: array<string>, name: string): bool => {
-  Belt.Array.some(args, arg => arg == name)
+  arrayLength(arrayFilter(args, arg => arg == name)) > 0
 }
 
 let collectInputs = (args: array<string>): array<string> => {
-  let inputs = Belt.Array.make(0, "")
+  let inputs = arrayMake(0, "")
   let rec loop = i =>
-    if i >= Belt.Array.length(args) {
+    if i >= arrayLength(args) {
       inputs
     } else {
-      let arg = Belt.Array.getExn(args, i)
-      if String.startsWith(arg, "-") {
+      let arg = arrayGetExn(args, i)
+      if startsWith(arg, "-") {
         inputs
       } else {
-        inputs->Belt.Array.push(arg)
+        inputs->arrayPush(arg)
         loop(i + 1)
       }
     }
@@ -101,18 +102,15 @@ let validateDoc = (input: string, mode: A2ml.parseMode): array<A2ml.parseError> 
 
 let astDoc = (input: string, mode: A2ml.parseMode): string => {
   let doc = A2ml.parse(~mode, input)
-  switch JSON.stringifyAny(Json.docToJson(doc)) {
-  | Some(value) => value
-  | None => "{}"
-  }
+  Json.docToJson(doc)
 }
 
 let _ = {
   let args = argv
-  if hasFlag(args, "-h") || hasFlag(args, "--help") { Console.log(helpText); exit(0) }
-  if Belt.Array.length(args) < 3 { usage() }
+  if hasFlag(args, "-h") || hasFlag(args, "--help") { consoleLog(helpText); exit(0) }
+  if arrayLength(args) < 3 { usage() }
 
-  let command = Belt.Array.getExn(args, 2)
+  let command = arrayGetExn(args, 2)
   let inputs = collectInputs(args)
   let readFromStdin = hasFlag(args, "--stdin")
 
@@ -125,33 +123,33 @@ let _ = {
   let concat = hasFlag(args, "--concat")
 
   let sources = if readFromStdin { ["-"] } else { inputs }
-  if Belt.Array.length(sources) == 0 { usage() }
+  if arrayLength(sources) == 0 { usage() }
 
   switch command {
   | "render" =>
-      let outputs = sources->Belt.Array.map(src => renderDoc(readInput(src), mode))
+      let outputs = sources->arrayMap(src => renderDoc(readInput(src), mode))
       let result =
-        if concat { outputs->Belt.Array.joinWith("\n", s => s) } else { outputs->Belt.Array.joinWith("\n\n", s => s) }
+        if concat { outputs->arrayJoinWith("\n", s => s) } else { outputs->arrayJoinWith("\n\n", s => s) }
       switch outPath {
       | Some(p) => writeText(p, result)
-      | None => Console.log(result)
+      | None => consoleLog(result)
       }
   | "validate" =>
       let allErrors = sources
-        ->Belt.Array.map(src => validateDoc(readInput(src), mode))
-        ->Belt.Array.reduce([], (acc, errs) => Belt.Array.concat(acc, errs))
-      if Belt.Array.length(allErrors) == 0 {
-        Console.log("ok")
+        ->arrayMap(src => validateDoc(readInput(src), mode))
+        ->arrayReduce([], (acc, errs) => arrayConcat(acc, errs))
+      if arrayLength(allErrors) == 0 {
+        consoleLog("ok")
       } else {
-        allErrors->Belt.Array.forEach(e => Console.error(`${Int.toString(e.line)}: ${e.msg}`))
+        allErrors->arrayForEach(e => consoleLog(`${intToString(e.line)}: ${e.msg}`))
         exit(2)
       }
   | "ast" =>
-      let outputs = sources->Belt.Array.map(src => astDoc(readInput(src), mode))
-      let result = outputs->Belt.Array.joinWith("\n", s => s)
+      let outputs = sources->arrayMap(src => astDoc(readInput(src), mode))
+      let result = outputs->arrayJoinWith("\n", s => s)
       switch outPath {
       | Some(p) => writeText(p, result)
-      | None => Console.log(result)
+      | None => consoleLog(result)
       }
   | _ => usage()
   }
