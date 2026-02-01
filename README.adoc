@@ -10,6 +10,18 @@ want them.
 
 This repository is a satellite of the Hyperpolymath standards hub.
 
+== What It Does
+
+* Author a readable surface format with strict, typed guarantees when needed.
+* Validate structure (IDs, refs, required sections) with progressive modes.
+* Preserve opaque payloads byte-for-byte for reliable embedding.
+
+== Where It Is Going
+
+* Broader tooling integration (CLI, LSP, renderers).
+* More profiles for domain-specific validation.
+* Stronger proof coverage and conformance automation.
+
 == Why A2ML
 
 * Lightweight authoring with progressive strictness (lax -> checked -> attested)
