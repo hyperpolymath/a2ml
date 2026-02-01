@@ -616,6 +616,13 @@ contractiles-a2ml-emit outdir="build/contractiles":
 contractiles-a2ml-test:
     @scripts/contractiles-a2ml-test.sh
 
+# Sync .machine_readable metadata into 6scm mirrors
+sync-6scm:
+    @mkdir -p .machine_readable/6scm
+    @for f in AGENTIC.scm ECOSYSTEM.scm META.scm NEUROSYM.scm PLAYBOOK.scm STATE.scm; do \
+      if [ -f ".machine_readable/$$f" ]; then cp -f ".machine_readable/$$f" ".machine_readable/6scm/$$f"; fi; \
+    done
+
 # Count lines of code
 loc:
     @find . \( -name "*.rs" -o -name "*.ex" -o -name "*.res" -o -name "*.ncl" -o -name "*.scm" \) 2>/dev/null | xargs wc -l 2>/dev/null | tail -1 || echo "0"
