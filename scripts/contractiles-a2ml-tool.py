@@ -7,12 +7,14 @@ from pathlib import Path
 SPEC_VERSION = "1.0.0"
 
 REQUIRED = {
-    "Mustfile.a2ml": {
+    "mustfile": {
+        "filename": "Mustfile.a2ml",
         "sections": ["Parameters", "Checks"],
         "parameters": ["gateway_port", "schema_version"],
         "item_fields": ["description", "run"],
     },
-    "Trustfile.a2ml": {
+    "trustfile": {
+        "filename": "Trustfile.a2ml",
         "sections": ["Inputs", "Verifications"],
         "inputs": [
             "policy_path",
@@ -27,7 +29,8 @@ REQUIRED = {
         ],
         "item_fields": ["description", "command"],
     },
-    "Dustfile.a2ml": {
+    "dustfile": {
+        "filename": "Dustfile.a2ml",
         "sections": ["Logs", "Policy", "Gateway", "Dust-Events"],
         "fields_by_section": {
             "Logs": ["path", "reversible", "handler"],
@@ -36,10 +39,13 @@ REQUIRED = {
             "Dust-Events": ["source", "transform"],
         },
     },
-    "Intentfile.a2ml": {
+    "intentfile": {
+        "filename": "Intentfile.a2ml",
         "sections": ["Trust-Engine", "Control-Plane", "Pipeline", "Introspection"],
     },
 }
+
+NAME_TO_TYPE = {v["filename"]: k for k, v in REQUIRED.items()}
 
 
 def parse_a2ml(path: Path):
@@ -88,12 +94,20 @@ def parse_a2ml(path: Path):
     return data
 
 
-def validate(path: Path):
-    name = path.name
-    if name not in REQUIRED:
-        return [f"Unsupported file: {name}"]
+def resolve_type(path: Path, explicit: str | None):
+    if explicit:
+        if explicit not in REQUIRED:
+            return None
+        return explicit
+    return NAME_TO_TYPE.get(path.name)
 
-    req = REQUIRED[name]
+
+def validate(path: Path, explicit_type: str | None):
+    doc_type = resolve_type(path, explicit_type)
+    if not doc_type:
+        return [f"Unsupported file: {path.name}"]
+
+    req = REQUIRED[doc_type]
     parsed = parse_a2ml(path)
     errors = []
 
@@ -101,7 +115,7 @@ def validate(path: Path):
         if section not in parsed["sections"]:
             errors.append(f"Missing section: {section}")
 
-    if name == "Mustfile.a2ml":
+    if doc_type == "mustfile":
         params = {}
         for entry in parsed["bullets"].get("Parameters", []):
             if isinstance(entry, dict):
@@ -124,7 +138,7 @@ def validate(path: Path):
                 if field not in check or check[field] == "":
                     errors.append(f"Check '{cname}' missing field: {field}")
 
-    elif name == "Trustfile.a2ml":
+    elif doc_type == "trustfile":
         inputs = {}
         for entry in parsed["bullets"].get("Inputs", []):
             if isinstance(entry, dict):
@@ -143,7 +157,7 @@ def validate(path: Path):
                 if field not in verification or verification[field] == "":
                     errors.append(f"Verification '{vname}' missing field: {field}")
 
-    elif name == "Dustfile.a2ml":
+    elif doc_type == "dustfile":
         for section, fields in req.get("fields_by_section", {}).items():
             items = parsed["items"].get(section, [])
             if not items:
@@ -158,7 +172,7 @@ def validate(path: Path):
                     if field not in entry or entry[field] == "":
                         errors.append(f"{section} '{ename}' missing field: {field}")
 
-    elif name == "Intentfile.a2ml":
+    elif doc_type == "intentfile":
         for section in req.get("sections", []):
             bullets = parsed["bullets"].get(section, [])
             if not bullets:
@@ -167,11 +181,14 @@ def validate(path: Path):
     return errors
 
 
-def emit(path: Path):
-    name = path.name
+def emit(path: Path, explicit_type: str | None):
+    doc_type = resolve_type(path, explicit_type)
+    if not doc_type:
+        raise SystemExit(f"Unsupported file: {path.name}")
+
     parsed = parse_a2ml(path)
 
-    if name == "Mustfile.a2ml":
+    if doc_type == "mustfile":
         parameters = {}
         for entry in parsed["bullets"].get("Parameters", []):
             if isinstance(entry, dict):
@@ -184,7 +201,7 @@ def emit(path: Path):
             "checks": checks,
         }
 
-    if name == "Trustfile.a2ml":
+    if doc_type == "trustfile":
         inputs = {}
         for entry in parsed["bullets"].get("Inputs", []):
             if isinstance(entry, dict):
@@ -197,9 +214,9 @@ def emit(path: Path):
             "verifications": verifications,
         }
 
-    if name == "Dustfile.a2ml":
+    if doc_type == "dustfile":
         sections = {}
-        for section in REQUIRED[name]["sections"]:
+        for section in REQUIRED[doc_type]["sections"]:
             sections[section] = parsed["items"].get(section, [])
         return {
             "type": "dustfile",
@@ -207,9 +224,9 @@ def emit(path: Path):
             "sections": sections,
         }
 
-    if name == "Intentfile.a2ml":
+    if doc_type == "intentfile":
         future = {}
-        for section in REQUIRED[name]["sections"]:
+        for section in REQUIRED[doc_type]["sections"]:
             items = parsed["bullets"].get(section, [])
             future[section] = [item if isinstance(item, str) else list(item.values())[0] for item in items]
         return {
@@ -218,7 +235,7 @@ def emit(path: Path):
             "future": future,
         }
 
-    raise SystemExit(f"Unsupported file: {name}")
+    raise SystemExit(f"Unsupported file: {path.name}")
 
 
 def main():
@@ -227,17 +244,19 @@ def main():
 
     vcmd = sub.add_parser("validate")
     vcmd.add_argument("files", nargs="+")
+    vcmd.add_argument("--type", choices=sorted(REQUIRED.keys()))
 
     ecmd = sub.add_parser("emit")
     ecmd.add_argument("input")
     ecmd.add_argument("output")
+    ecmd.add_argument("--type", choices=sorted(REQUIRED.keys()))
 
     args = parser.parse_args()
 
     if args.cmd == "validate":
         all_errors = []
         for f in args.files:
-            errors = validate(Path(f))
+            errors = validate(Path(f), args.type)
             for err in errors:
                 all_errors.append(f"{Path(f).name}: {err}")
         if all_errors:
@@ -247,7 +266,7 @@ def main():
         return 0
 
     if args.cmd == "emit":
-        output = emit(Path(args.input))
+        output = emit(Path(args.input), args.type)
         Path(args.output).write_text(json.dumps(output, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         return 0
 

@@ -31,10 +31,19 @@ expect_fail() {
   fi
 }
 
-expect_fail "$fixtures/invalid-mustfile.a2ml"
-expect_fail "$fixtures/invalid-trustfile.a2ml"
-expect_fail "$fixtures/invalid-dustfile.a2ml"
-expect_fail "$fixtures/invalid-intentfile.a2ml"
+expect_fail_type() {
+  local file="$1"
+  local type="$2"
+  if python3 "$tool" validate --type "$type" "$file"; then
+    echo "Expected validation failure: $file ($type)" >&2
+    exit 1
+  fi
+}
+
+expect_fail_type "$fixtures/invalid-mustfile.a2ml" mustfile
+expect_fail_type "$fixtures/invalid-trustfile.a2ml" trustfile
+expect_fail_type "$fixtures/invalid-dustfile.a2ml" dustfile
+expect_fail_type "$fixtures/invalid-intentfile.a2ml" intentfile
 
 rm -f "$expected/mustfile.json.tmp" \
   "$expected/trustfile.json.tmp" \
