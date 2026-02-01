@@ -23,3 +23,10 @@ and stable, parseable sections.
 
 These are examples only. If you adopt A2ML as the source of truth,
 add a validator step in your Justfile and pin to a specific A2ML spec version.
+
+## Commands
+
+@opaque(lang="bash"):
+just contractiles-a2ml-validate
+just contractiles-a2ml-emit build/contractiles
+@end
