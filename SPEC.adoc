@@ -129,6 +129,21 @@ The Module 0 prototype in `prototype/rescript/` is intentionally small:
 * Checked: IDs required, references must resolve, no unknown directives.
 * Attested: typed core + proof obligations must discharge.
 
+== Profiles (Non-Executable)
+
+Profiles are named validation bundles that add required sections, fields, and
+structural rules on top of the base A2ML modes. Profiles do not grant execution
+capabilities or side effects. They are strictly about validation and attestation.
+
+* Profiles are optional and MUST be safe under Checked/Attested modes.
+* A profile MUST NOT imply command execution, network access, or filesystem writes.
+* Tools MAY expose profiles via flags (e.g., `--profile contractiles-v1`).
+* If a profile is declared in a document, validators SHOULD enforce it.
+
+This allows “active” or “attested” variants (often described as A2MLa) without
+introducing a new executable file type. A2ML remains read-only; profiles only
+increase validation strictness.
+
 == Typed Core (Idris2 Outline)
 
 [source]

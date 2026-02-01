@@ -84,6 +84,11 @@ A v1 validator MUST:
 1. Run `a2ml validate` on each file for A2ML structural correctness.
 2. Enforce required sections and fields as specified above.
 
+== Profile Name
+
+This spec can be referenced as the `contractiles-v1` profile. Profiles only
+increase validation strictness and MUST NOT introduce execution or side effects.
+
 == CLI
 
 The A2ML tooling adds:
