@@ -23,6 +23,19 @@ diff -u "$expected/trustfile.json" "$expected/trustfile.json.tmp"
 diff -u "$expected/dustfile.json" "$expected/dustfile.json.tmp"
 diff -u "$expected/intentfile.json" "$expected/intentfile.json.tmp"
 
+expect_fail() {
+  local file="$1"
+  if python3 "$tool" validate "$file"; then
+    echo "Expected validation failure: $file" >&2
+    exit 1
+  fi
+}
+
+expect_fail "$fixtures/invalid-mustfile.a2ml"
+expect_fail "$fixtures/invalid-trustfile.a2ml"
+expect_fail "$fixtures/invalid-dustfile.a2ml"
+expect_fail "$fixtures/invalid-intentfile.a2ml"
+
 rm -f "$expected/mustfile.json.tmp" \
   "$expected/trustfile.json.tmp" \
   "$expected/dustfile.json.tmp" \
