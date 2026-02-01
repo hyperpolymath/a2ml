@@ -23,6 +23,7 @@ and stable, parseable sections.
 
 These are examples only. If you adopt A2ML as the source of truth,
 add a validator step in your Justfile and pin to a specific A2ML spec version.
+This set follows Contractiles A2ML v1.0.0.
 
 ## Commands
 
@@ -30,4 +31,5 @@ add a validator step in your Justfile and pin to a specific A2ML spec version.
 just contractiles-a2ml-validate
 just contractiles-k9-validate
 just contractiles-a2ml-emit build/contractiles
+just contractiles-a2ml-test
 @end

@@ -612,6 +612,10 @@ contractiles-k9-validate:
 contractiles-a2ml-emit outdir="build/contractiles":
     @scripts/contractiles-a2ml-emit.sh "{{outdir}}"
 
+# Test Contractiles A2ML v1 fixtures
+contractiles-a2ml-test:
+    @scripts/contractiles-a2ml-test.sh
+
 # Count lines of code
 loc:
     @find . \( -name "*.rs" -o -name "*.ex" -o -name "*.res" -o -name "*.ncl" -o -name "*.scm" \) 2>/dev/null | xargs wc -l 2>/dev/null | tail -1 || echo "0"
