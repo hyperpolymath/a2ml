@@ -623,6 +623,10 @@ sync-6scm:
       if [ -f ".machine_readable/$$f" ]; then cp -f ".machine_readable/$$f" ".machine_readable/6scm/$$f"; fi; \
     done
 
+# Check .machine_readable 6scm mirrors are in sync
+check-6scm:
+    @scripts/check-6scm.sh
+
 # Count lines of code
 loc:
     @find . \( -name "*.rs" -o -name "*.ex" -o -name "*.res" -o -name "*.ncl" -o -name "*.scm" \) 2>/dev/null | xargs wc -l 2>/dev/null | tail -1 || echo "0"
