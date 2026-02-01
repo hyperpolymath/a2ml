@@ -604,6 +604,10 @@ log count="20":
 contractiles-a2ml-validate:
     @scripts/contractiles-a2ml-validate.sh
 
+# Validate Contractiles via K9 component + A2ML CLI
+contractiles-k9-validate:
+    @scripts/contractiles-k9-validate.sh
+
 # Emit JSON stubs from Contractiles A2ML examples
 contractiles-a2ml-emit outdir="build/contractiles":
     @scripts/contractiles-a2ml-emit.sh "{{outdir}}"
