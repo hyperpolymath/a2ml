@@ -82,3 +82,6 @@ prototype/rescript/node_modules/
 prototype/rescript/src/*.bs.js
 prototype/rescript/package-lock.json
 generated/
+
+# Crash recovery artifacts
+ai-cli-crash-capture/
